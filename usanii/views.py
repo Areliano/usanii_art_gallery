@@ -2,7 +2,7 @@
 
 from django.shortcuts import render, redirect
 
-from .models import Aboutpage, Artists, Homepage, Artworks, Exhibitions, Contact, Footer, Customer
+from .models import Aboutpage, Artists, Homepage, Artworks, Exhibitions, Contact, Footer, Customer, Moreartist
 
 from django.utils import timezone
 
@@ -31,7 +31,7 @@ def home(request):
 def artworks(request):
     artworks = Artworks.objects.all()
     footer = Footer.objects.all()
-    return render(request, "menu.html", {"arwtorks": artworks, "footer": footer})
+    return render(request, "artworks.html", {"artworks": artworks, "footer": footer})
 
 def exhibitions(request):
     exhibitions = Exhibitions.objects.all()
@@ -160,7 +160,8 @@ def send_inquiry_email(request):
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
 
 def moreartist(request):
-    artists = Artists.objects.all()
-    return render(request, "moreartist.html", {"artists":artists})
+    moreartist = Moreartist.objects.all()
+    footer = Footer.objects.all()
+    return render(request, "moreartist.html", {"moreartist":moreartist, "footer":footer })
 
 

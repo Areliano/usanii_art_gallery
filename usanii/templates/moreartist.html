@@ -18,16 +18,16 @@
     <div class="container">
         <h2 class="text-center my-4">Explore More Artwork by Our Artists</h2>
         <div class="row">
-            {% for artist in artists %}
+            {% for moreartist in moreartist %}
             <div class="col-md-4 mb-4">
                 <div class="card">
-                    <div class="img-container" style="background-image: url('{{ artist.image.url }}');"></div>
+                    <div class="img-container" style="background-image: url('{{ moreartist.image.url }}');"></div>
                     <div class="card-body text-center">
-                        <h5 class="card-title">Art Title: {{ artist.title }}</h5>
-                        <p class="card-text">Artist Name: {{ artist.name }}</p>
-                        <button class="btn {% if artist.available %}btn-success{% else %}btn-danger{% endif %} inquiry-btn"
-                            data-title="{{ artist.title }}" data-image="{{ artist.image.url }}">
-                            {% if artist.available %} Available {% else %} Unavailable {% endif %}
+                        <h5 class="card-title">Art Title: {{ moreartist.title }}</h5>
+                        <p class="card-text">Artist Name: {{ moreartist.name }}</p>
+                        <button class="btn {% if moreartist.available %}btn-success{% else %}btn-danger{% endif %} inquiry-btn"
+                            data-title="{{ moreartist.title }}" data-image="{{ moreartist.image.url }}">
+                            {% if moreartist.available %} Available {% else %} Unavailable {% endif %}
                         </button>
                     </div>
                 </div>

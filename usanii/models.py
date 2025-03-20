@@ -91,3 +91,12 @@ class Customer(models.Model):
 
     def __str__(self):
         return self.name
+
+class Moreartist(models.Model):
+    name = models.CharField(max_length=500, default='text1')
+    image = models.ImageField(upload_to='moreatist', default='moreartist.jpg')
+    title = models.CharField(max_length=255, default='artists')
+    available = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
