@@ -1,0 +1,64 @@
+{% extends 'common.html' %}
+
+{% load static %}
+
+{% block body %}
+
+<section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/art6.jpg' %}'); height: 100vh; background-size: cover;" data-stellar-background-ratio="0.5">
+      <div class="overlay"></div>
+      <div class="container">
+        <div class="row no-gutters slider-text align-items-center justify-content-center">
+          <div class="col-md-9 ftco-animate text-center" style="background: #ffc4c4">
+            <h1 class="mb-2 bread">Successful Reservations</h1>
+            <p class="breadcrumbs"><span class="mr-2"><a href="{% url 'home' %}">Home <i class="ion-ios-arrow-forward"></i></a></span> <span>Booked <i class="ion-ios-arrow-forward"></i></span></p>
+          </div>
+        </div>
+      </div>
+</section>
+
+
+
+<div class="container-fluid"style="background: #ffc4c4" >
+<!--<div class="container"> -->
+<table class="table mt-5 mb-5">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Name</th>
+      <th scope="col">Email</th>
+      <th scope="col">Phone number</th>
+      <th scope="col">Date</th>
+      <th scope="col">Time</th>
+        <th scope="col">Event/Exhibition Name</th>
+      <th scope="col">Edit</th>
+      <th scope="col">Delete</th>
+    </tr>
+  </thead>
+  <tbody>
+
+      {% for t in data %}
+
+           <tr>
+             <th scope="row">{{ t.id }}</th>
+             <th scope="row">{{ t.name }}</th>
+             <td>{{ t.email }}</td>
+               <td>{{ t.phone }}</td>
+             <td>{{ t.date }}</td>
+             <td>{{ t.time }}</td>
+             <td>{{ t.event }}</td>
+               <td>
+                   <a class="btn btn-warning" href="/edit/{{ t.id }}">Edit</a>
+               </td>
+               <td>
+                   <a class="btn btn-danger" href="/delete/{{ t.id }}">Delete</a>
+               </td>
+
+           </tr>
+      {% endfor %}
+
+  </tbody>
+<!-- </div> -->
+</table>
+</div>
+
+{% endblock %}
