@@ -25,9 +25,8 @@
               <span class="subheading">Rebook an Event/Exhibition</span>
               <h2 class="mb-4">Edit Reservation</h2>
             </div>
-           <!-- <form action="/edit/{{ Customer.id }}/" method="POST"> -->
-              <form action="{% url 'edit' Customer.id %}" method="POST">
 
+            <form action="{% url 'edit' Customer.id %}" method="POST">
                 {% csrf_token %}
 
               <div class="row">
@@ -52,7 +51,7 @@
                 <div class="col-md-6">
                   <div class="form-group">
                     <label for="">Date</label>
-                    <input type="date" class="form-control" placeholder="Date" name="datetime" value="{{ Customer.date|date:'Y-m-d' }}">
+                    <input type="date" class="form-control" name="date" value="{{ Customer.date|date:'Y-m-d'|default:'' }}">
                   </div>
                 </div>
                 <div class="col-md-6">
@@ -64,13 +63,13 @@
                 <div class="col-md-6">
                   <div class="form-group">
                     <label for="">Name of event/exhibition</label>
-                    <input type="text" name="event_name" class="form-control" placeholder="e.g Africa Themed Event" value="{{ Customer.event }}">
+                    <input type="text" name="event" class="form-control" placeholder="e.g Africa Themed Event" value="{{ Customer.event }}">
                   </div>
                 </div>
 
                 <div class="col-md-12 mt-3">
                   <div class="form-group">
-                    <input type="submit" value="Book a new Reservation" class="btn btn-primary py-3 px-5">
+                    <input type="submit" value="Update Reservation" class="btn btn-primary py-3 px-5">
                   </div>
                 </div>
               </div>

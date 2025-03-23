@@ -87,7 +87,7 @@ class Customer(models.Model):
     phone = models.CharField(max_length=100)
     date = models.CharField(max_length=10, default='dd/mm/yyyy')
     time = models.TimeField(max_length=50, default=timezone.now)
-    event = models.CharField(max_length=300, blank=False, default='Opening Event')
+    event = models.CharField(max_length=300, blank=True, default='Opening Event')
     is_approved = models.BooleanField(null=True, default=None)  # Status field
 
     def __str__(self):
@@ -107,7 +107,7 @@ class Reservation(models.Model):
 
 class Moreartist(models.Model):
     name = models.CharField(max_length=500, default='text1')
-    image = models.ImageField(upload_to='moreatist', default='moreartist.jpg')
+    image = models.ImageField(upload_to='moreartist', default='moreartist.jpg')
     title = models.CharField(max_length=255, default='artists')
     available = models.BooleanField(default=True)
 

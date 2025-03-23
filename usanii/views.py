@@ -163,19 +163,39 @@ def insertdata(request):
 
     return redirect("booked")
 
+
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Customer
+from datetime import datetime
+
+
 def edit(request, id):
-    customer = Customer.objects.get(id=id)
+    customer = get_object_or_404(Customer, id=id)
+
     if request.method == 'POST':
         customer.name = request.POST.get('name')
         customer.email = request.POST.get('email')
         customer.phone = request.POST.get('phone')
-        customer.date = request.POST.get('date')
+
+        # Ensure date is properly retrieved and converted
+        date_str = request.POST.get('date')
+        if date_str:
+            try:
+                customer.date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            except ValueError:
+                pass
+
         customer.time = request.POST.get('time')
-        customer.event = request.POST.get('event')
+
+        # Fix: Ensure event is retrieved correctly
+        event_name = request.POST.get('event_name')
+        customer.event = event_name if event_name else "Unknown Event"  # Default value
+
         customer.save()
         return redirect("booked")
 
     return render(request, 'edit.html', {'Customer': customer})
+
 
 def send_inquiry_email(request):
     if request.method == 'POST':
