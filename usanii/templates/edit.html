@@ -1,82 +1,139 @@
 {% extends 'common.html' %}
-
 {% load static %}
 
 {% block body %}
 
-    <section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/art6.jpg' %}'); height: 100vh; background-size: cover;" data-stellar-background-ratio="0.5">
-      <div class="overlay"></div>
-      <div class="container">
-        <div class="row no-gutters slider-text align-items-center justify-content-center">
-          <div class="col-md-9 ftco-animate text-center" style="background: #ffc4c4">
-            <h1 class="mb-2 bread">Edit Your Reservation</h1>
-            <p class="breadcrumbs"><span class="mr-2"><a href="{% url 'home' %}">Home <i class="ion-ios-arrow-forward"></i></a></span> <span>Edit Your Reservation <i class="ion-ios-arrow-forward"></i></span></p>
-          </div>
-        </div>
+<section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/art6.jpg' %}'); height: 100vh; background-size: cover;" data-stellar-background-ratio="0.5">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row no-gutters slider-text align-items-center justify-content-center">
+      <div class="col-md-9 ftco-animate text-center" style="background: #ffc4c4">
+        <h1 class="mb-2 bread">Edit Your Reservation</h1>
+        <p class="breadcrumbs">
+          <span class="mr-2">
+            <a href="{% url 'home' %}">Home <i class="ion-ios-arrow-forward"></i></a>
+          </span>
+          <span>Edit Your Reservation <i class="ion-ios-arrow-forward"></i></span>
+        </p>
       </div>
-    </section>
+    </div>
+  </div>
+</section>
 
-    <section class="ftco-section ftco-no-pt ftco-no-pb" style="background: #ffc4c4">
-      <div class="container">
-        <div class="row d-flex">
-          <div class="col-md-5 ftco-animate img img-2" style="background-image: url({% static 'images/art7.jpg' %});"></div>
-          <div class="col-md-7 ftco-animate makereservation p-4 p-md-5">
-            <div class="heading-section ftco-animate mb-5">
-              <span class="subheading">Rebook an Event/Exhibition</span>
-              <h2 class="mb-4">Edit Reservation</h2>
+<section class="ftco-section ftco-no-pt ftco-no-pb" style="background: #ffc4c4">
+  <div class="container">
+    <div class="row d-flex">
+      <div class="col-md-5 ftco-animate img img-2" style="background-image: url({% static 'images/art7.jpg' %});"></div>
+      <div class="col-md-7 ftco-animate makereservation p-4 p-md-5">
+        <div class="heading-section ftco-animate mb-5">
+          <span class="subheading">Rebook an Event/Exhibition</span>
+          <h2 class="mb-4">Edit Reservation</h2>
+        </div>
+
+        {% if messages %}
+          <div class="container mt-3">
+            {% for message in messages %}
+              <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <form action="{% url 'edit' customer.id %}" method="POST" onsubmit="return validateForm()">
+          {% csrf_token %}
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="Your Name" value="{{ customer.name }}" pattern="[A-Za-z\s]+" title="Only letters and spaces allowed" required>
+              </div>
             </div>
 
-            <form action="{% url 'edit' Customer.id %}" method="POST">
-                {% csrf_token %}
-
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="">Name</label>
-                    <input type="text" class="form-control" placeholder="Your Name" name="name" value="{{ Customer.name }}">
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="">Email</label>
-                    <input type="email" class="form-control" placeholder="Your Email" name="email" value="{{ Customer.email }}">
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="">Phone</label>
-                    <input type="text" class="form-control" placeholder="Phone" name="phone" value="{{ Customer.phone }}">
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="">Date</label>
-                    <input type="date" class="form-control" name="date" value="{{ Customer.date|date:'Y-m-d'|default:'' }}">
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="">Time</label>
-                    <input type="text" class="form-control" placeholder="Time" name="time" value="{{ Customer.time }}">
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="">Name of event/exhibition</label>
-                    <input type="text" name="event" class="form-control" placeholder="e.g Africa Themed Event" value="{{ Customer.event }}">
-                  </div>
-                </div>
-
-                <div class="col-md-12 mt-3">
-                  <div class="form-group">
-                    <input type="submit" value="Update Reservation" class="btn btn-primary py-3 px-5">
-                  </div>
-                </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="Your Email" value="{{ customer.email }}" required>
               </div>
-            </form>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="phone">Phone</label>
+                <input type="text" class="form-control" id="phone" name="phone" placeholder="Phone" value="{{ customer.phone }}" pattern="[0-9]{10}" title="Phone number must be exactly 10 digits" required>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="datetime">Date</label>
+                <input type="date" class="form-control" id="datetime" name="datetime" value="{% if customer.date %}{{ customer.date|date:'Y-m-d' }}{% endif %}" required>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="time">Time</label>
+                <input type="time" class="form-control" id="time" name="time" value="{{ customer.time }}" required>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="event_name">Name of Event/Exhibition</label>
+                <input type="text" class="form-control" id="event_name" name="event_name" placeholder="e.g Africa Themed Event" value="{{ customer.event }}" pattern="[A-Za-z\s]+" title="Only letters and spaces allowed" required>
+              </div>
+            </div>
+
+            <div class="col-md-12 mt-3">
+              <div class="form-group">
+                <input type="submit" value="Update Reservation" class="btn btn-primary py-3 px-5">
+              </div>
+            </div>
           </div>
-        </div>
+        </form>
+
+        <script>
+          function validateForm() {
+            let name = document.getElementById("name").value;
+            let phone = document.getElementById("phone").value;
+            let eventName = document.getElementById("event_name").value;
+            let date = document.getElementById("datetime").value;
+            let today = new Date().toISOString().split("T")[0];
+
+            let nameRegex = /^[A-Za-z\s]+$/;
+            if (!nameRegex.test(name)) {
+              alert("Name can only contain letters and spaces.");
+              return false;
+            }
+
+            let phoneRegex = /^[0-9]{10}$/;
+            if (!phoneRegex.test(phone)) {
+              alert("Phone number must be exactly 10 digits.");
+              return false;
+            }
+
+            if (!nameRegex.test(eventName)) {
+              alert("Event name can only contain letters and spaces.");
+              return false;
+            }
+
+            if (date < today) {
+              alert("Date cannot be in the past.");
+              return false;
+            }
+
+            return true;
+          }
+        </script>
+
       </div>
-    </section>
+    </div>
+  </div>
+</section>
 
 {% endblock %}

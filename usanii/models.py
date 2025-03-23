@@ -81,14 +81,15 @@ class Footer(models.Model):
         return self.heading
 
 
+
 class Customer(models.Model):
-    name = models.CharField(max_length=150, blank=False)
+    name = models.CharField(max_length=255)
     email = models.EmailField()
-    phone = models.CharField(max_length=100)
-    date = models.CharField(max_length=10, default='dd/mm/yyyy')
-    time = models.TimeField(max_length=50, default=timezone.now)
-    event = models.CharField(max_length=300, blank=True, default='Opening Event')
-    is_approved = models.BooleanField(null=True, default=None)  # Status field
+    phone = models.CharField(max_length=15)
+    date = models.DateField(null=True, blank=True)  # ✅ Ensure null & blank are allowed
+    time = models.TimeField(null=True, blank=True)
+    event = models.CharField(max_length=255, default="Unknown Event")
+    is_approved = models.BooleanField(default=False)  # ✅ Ensure this exists
 
     def __str__(self):
         return self.name

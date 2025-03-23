@@ -1,92 +1,136 @@
 {% extends 'common.html' %}
-
 {% load static %}
 
 {% block body %}
 
-    <section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/art6.jpg' %}'); height: 100vh; background-size: cover;" data-stellar-background-ratio="0.5">
-      <div class="overlay"></div>
-      <div class="container">
-        <div class="row no-gutters slider-text align-items-center justify-content-center">
-          <div class="col-md-9 ftco-animate text-center" style="background: #ffc4c4">
-            <h1 class="mb-2 bread">Make Reservation</h1>
-            <p class="breadcrumbs">
-              <span class="mr-2"><a href="{% url 'home' %}">Home <i class="ion-ios-arrow-forward"></i></a></span>
-              <span>Exhibition Reservation <i class="ion-ios-arrow-forward"></i></span>
-            </p>
-          </div>
-        </div>
+<section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/art6.jpg' %}'); height: 100vh; background-size: cover;" data-stellar-background-ratio="0.5">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row no-gutters slider-text align-items-center justify-content-center">
+      <div class="col-md-9 ftco-animate text-center" style="background: #ffc4c4">
+        <h1 class="mb-2 bread">Make Reservation</h1>
+        <p class="breadcrumbs">
+          <span class="mr-2"><a href="{% url 'home' %}">Home <i class="ion-ios-arrow-forward"></i></a></span>
+          <span>Exhibition Reservation <i class="ion-ios-arrow-forward"></i></span>
+        </p>
       </div>
-    </section>
+    </div>
+  </div>
+</section>
 
-    <section class="ftco-section ftco-no-pt ftco-no-pb" style="background: #ffc4c4">
-      <div class="container">
-        <div class="row d-flex">
-          <div class="col-md-5 ftco-animate img img-2" style="background-image: url({% static 'images/art7.jpg' %});"></div>
-          <div class="col-md-7 ftco-animate makereservation p-4 p-md-5">
-            <div class="heading-section ftco-animate mb-5">
-              <span class="subheading">Book an Exhibition/Event</span>
-              <h2 class="mb-4">Make Reservation with us</h2>
+<section class="ftco-section ftco-no-pt ftco-no-pb" style="background: #ffc4c4">
+  <div class="container">
+    <div class="row d-flex">
+      <div class="col-md-5 ftco-animate img img-2" style="background-image: url({% static 'images/art7.jpg' %});"></div>
+      <div class="col-md-7 ftco-animate makereservation p-4 p-md-5">
+        <div class="heading-section ftco-animate mb-5">
+          <span class="subheading">Book an Exhibition/Event</span>
+          <h2 class="mb-4">Make Reservation with us</h2>
+        </div>
+
+        <!-- ✅ FIXED FORM VALIDATIONS -->
+        <form action="{% url 'insertdata' %}" method="POST" onsubmit="return validateForm()">
+          {% csrf_token %}
+
+          <div class="row">
+            <!-- Name Field -->
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" placeholder="Your Name" name="name" id="name" pattern="[A-Za-z\s]+" title="Only letters and spaces allowed" required>
+              </div>
             </div>
 
-            <!-- ✅ FIXED FORM ACTION -->
-            <form action="{% url 'insertdata' %}" method="POST">
-              {% csrf_token %}
-
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="name">Name</label>
-                    <input type="text" class="form-control" placeholder="Your Name" name="name" required>
-                  </div>
-                </div>
-
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" class="form-control" placeholder="Your Email" name="email" required>
-                  </div>
-                </div>
-
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="phone">Phone</label>
-                    <input type="text" class="form-control" placeholder="Phone" name="phone" required>
-                  </div>
-                </div>
-
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="date">Date</label>
-                    <input type="text" class="form-control" placeholder="dd/mm/yyyy" name="date" required>
-                  </div>
-                </div>
-
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="time">Time</label>
-                    <input type="text" class="form-control" placeholder="HH:MM 24-hr clock system" name="time" required>
-                  </div>
-                </div>
-
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="event">Name of Event/Exhibition</label>
-                    <input type="text" name="event" class="form-control" placeholder="e.g Africa Theme Event" required>
-                  </div>
-                </div>
+            <!-- Email Field -->
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" placeholder="Your Email" name="email" required>
               </div>
+            </div>
 
-              <div class="col-md-12 mt-3">
-                <div class="form-group">
-                  <input type="submit" value="Book Exhibition" class="btn btn-primary py-3 px-5">
-                </div>
+            <!-- Phone Field -->
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="phone">Phone</label>
+                <input type="text" class="form-control" placeholder="Phone (10 digits)" name="phone" id="phone" pattern="[0-9]{10}" title="Phone number must be exactly 10 digits" required>
               </div>
+            </div>
 
-            </form>
+            <!-- Date Field -->
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="date">Date</label>
+                <input type="date" class="form-control" name="date" id="date" required>
+              </div>
+            </div>
+
+            <!-- Time Field -->
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="time">Time</label>
+                <input type="text" class="form-control" placeholder="HH:MM (24-hr format)" name="time" required>
+              </div>
+            </div>
+
+            <!-- Event Name Field -->
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="event">Name of Event/Exhibition</label>
+                <input type="text" name="event" class="form-control" placeholder="e.g. Africa Theme Event" id="event" pattern="[A-Za-z\s]+" title="Only letters and spaces allowed" required>
+              </div>
+            </div>
           </div>
-        </div>
+
+          <div class="col-md-12 mt-3">
+            <div class="form-group">
+              <input type="submit" value="Book Exhibition" class="btn btn-primary py-3 px-5">
+            </div>
+          </div>
+
+        </form>
       </div>
-    </section>
+    </div>
+  </div>
+</section>
+
+<!-- ✅ JavaScript Validation -->
+<script>
+  function validateForm() {
+      let name = document.getElementById("name").value;
+      let phone = document.getElementById("phone").value;
+      let eventName = document.getElementById("event").value;
+      let date = document.getElementById("date").value;
+      let today = new Date().toISOString().split("T")[0];
+
+      // Name should only contain letters and spaces
+      let nameRegex = /^[A-Za-z\s]+$/;
+      if (!nameRegex.test(name)) {
+          alert("Name can only contain letters and spaces.");
+          return false;
+      }
+
+      // Phone should be exactly 10 digits
+      let phoneRegex = /^[0-9]{10}$/;
+      if (!phoneRegex.test(phone)) {
+          alert("Phone number must be exactly 10 digits.");
+          return false;
+      }
+
+      // Event name should only contain letters and spaces
+      if (!nameRegex.test(eventName)) {
+          alert("Event name can only contain letters and spaces.");
+          return false;
+      }
+
+      // Date must not be in the past
+      if (date < today) {
+          alert("Date cannot be in the past.");
+          return false;
+      }
+
+      return true;
+  }
+</script>
 
 {% endblock %}

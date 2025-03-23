@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -13,6 +13,9 @@ from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import default_token_generator
 from .models import Aboutpage, Artists, Homepage, Artworks, Exhibitions, Contact, Footer, Customer, Moreartist
 from django.http import JsonResponse
+from datetime import datetime
+from django.urls import reverse_lazy, reverse
+from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 
 # User Registration with Admin Approval
 def register(request):
@@ -22,7 +25,6 @@ def register(request):
             user = form.save(commit=False)
             user.is_active = False  # User remains inactive until approved
             user.save()
-
             messages.success(request, "Account created! Await admin approval.")
             return redirect('login')
     else:
@@ -56,16 +58,11 @@ def user_logout(request):
     messages.success(request, "Logged out successfully.")
     return redirect('login')
 
-
-from django.shortcuts import get_object_or_404
-from django.contrib.auth.models import User
-
-
+# Account Activation
 def activate(request, uidb64, token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
-
         if default_token_generator.check_token(user, token):
             user.is_active = True
             user.save()
@@ -73,13 +70,11 @@ def activate(request, uidb64, token):
             return redirect('login')
         else:
             messages.error(request, "Invalid activation link.")
-    except Exception as e:
+    except Exception:
         messages.error(request, "Activation failed.")
-
     return redirect('home')
-from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView
-from django.urls import reverse_lazy
 
+# Password Reset Views
 class CustomPasswordResetView(PasswordResetView):
     template_name = 'password_reset.html'
     success_url = reverse_lazy('password_reset_done')
@@ -90,162 +85,140 @@ class CustomPasswordResetDoneView(PasswordResetDoneView):
 class CustomPasswordResetConfirmView(PasswordResetConfirmView):
     template_name = 'password_reset_confirm.html'
     success_url = reverse_lazy('login')
-from django.contrib.auth.views import PasswordResetCompleteView
 
 class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = 'password_reset_complete.html'
 
-
-# Views for Various Pages
+# Various Page Views
 def about(request):
-    about = Aboutpage.objects.all()
-    footer = Footer.objects.all()
-    return render(request, "about.html", {"about": about, "footer": footer})
+    return render(request, "about.html", {"about": Aboutpage.objects.all(), "footer": Footer.objects.all()})
 
 def artists(request):
-    artists = Artists.objects.all()
-    footer = Footer.objects.all()
-    return render(request, "artists.html", {"artists": artists, "footer": footer})
+    return render(request, "artists.html", {"artists": Artists.objects.all(), "footer": Footer.objects.all()})
 
 def home(request):
-    home = Homepage.objects.all()
-    about = Aboutpage.objects.all()
-    footer = Footer.objects.all()
-    context = {"home": home, "about": about, "footer": footer}
-    return render(request, 'home.html', context)
+    return render(request, 'home.html', {"home": Homepage.objects.all(), "about": Aboutpage.objects.all(), "footer": Footer.objects.all()})
 
 def artworks(request):
-    artworks = Artworks.objects.all()
-    footer = Footer.objects.all()
-    return render(request, "artworks.html", {"artworks": artworks, "footer": footer})
+    return render(request, "artworks.html", {"artworks": Artworks.objects.all(), "footer": Footer.objects.all()})
 
 def exhibitions(request):
-    exhibitions = Exhibitions.objects.all()
-    footer = Footer.objects.all()
-    return render(request, "exhibitions.html", {"exhibitions": exhibitions, "footer": footer})
+    return render(request, "exhibitions.html", {"exhibitions": Exhibitions.objects.all(), "footer": Footer.objects.all()})
 
 def contact(request):
-    contact = Contact.objects.all()
-    footer = Footer.objects.all()
-    return render(request, "contact.html", {"contact": contact, "footer": footer})
+    return render(request, "contact.html", {"contact": Contact.objects.all(), "footer": Footer.objects.all()})
 
 def reservation(request):
-    footer = Footer.objects.all()
-    return render(request, "reservation.html", {"footer": footer})
+    return render(request, "reservation.html", {"footer": Footer.objects.all()})
 
-#def booked(request):
- #   customers = Customer.objects.all()
-#    footer = Footer.objects.all()
- #   return render(request, "booked.html", {"data": customers, "footer": footer})
+# Updated Booked View
 def booked(request):
-    customers = Customer.objects.all()  # Fetch from correct model
-    footer = Footer.objects.all()
-    print(customers)
-    return render(request, "booked.html", {"data": customers, "footer": footer})
+    customers = Customer.objects.filter(is_approved=True)  # Show only approved customers
+    return render(request, "booked.html", {"data": customers, "footer": Footer.objects.all()})
 
+# Delete Customer
 def delete(request, id):
-    customer = Customer.objects.get(id=id)
-    customer.delete()
-    footer = Footer.objects.all()
+    get_object_or_404(Customer, id=id).delete()
     return redirect('booked')
 
+# Insert Customer Data
 def insertdata(request):
     if request.method == 'POST':
-        name = request.POST.get('name')
-        email = request.POST.get('email')
-        phone = request.POST.get('phone')
-        date = request.POST.get('date')
-        time = request.POST.get('time')
-        event = request.POST.get('event', 'Opening Event')
-
-        Customer.objects.create(name=name, email=email, phone=phone, date=date, time=time, event=event)
-        return redirect("booked")
-
+        Customer.objects.create(
+            name=request.POST.get('name'),
+            email=request.POST.get('email'),
+            phone=request.POST.get('phone'),
+            date=request.POST.get('date'),
+            time=request.POST.get('time'),
+            event=request.POST.get('event', 'Opening Event')
+        )
     return redirect("booked")
 
-
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from datetime import datetime
+from .models import Customer  # Ensure Customer model is imported
+
+from datetime import datetime
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from .models import Customer
+
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, render, redirect
+from django.contrib import messages
 from .models import Customer
 from datetime import datetime
 
-
 def edit(request, id):
+    # Check if the customer exists before using get_object_or_404
+    if not Customer.objects.filter(id=id).exists():
+        return HttpResponse(f"Customer with ID {id} does not exist", status=404)
+
     customer = get_object_or_404(Customer, id=id)
 
     if request.method == 'POST':
-        customer.name = request.POST.get('name')
-        customer.email = request.POST.get('email')
-        customer.phone = request.POST.get('phone')
+        customer.name = request.POST.get('name', customer.name)
+        customer.email = request.POST.get('email', customer.email)
+        customer.phone = request.POST.get('phone', customer.phone)
 
-        # Ensure date is properly retrieved and converted
-        date_str = request.POST.get('date')
+        # ✅ Ensure correct key for date input
+        date_str = request.POST.get('datetime')
         if date_str:
             try:
                 customer.date = datetime.strptime(date_str, '%Y-%m-%d').date()
             except ValueError:
-                pass
+                messages.error(request, "Invalid date format. Use YYYY-MM-DD.")
+                return redirect("edit", id=id)
+        else:
+            customer.date = None  # ✅ Allow blank date
 
-        customer.time = request.POST.get('time')
+        customer.time = request.POST.get('time', customer.time)
+        customer.event = request.POST.get('event_name', customer.event)
+        customer.is_approved = False  # Ensure re-approval
 
-        # Fix: Ensure event is retrieved correctly
-        event_name = request.POST.get('event_name')
-        customer.event = event_name if event_name else "Unknown Event"  # Default value
+        try:
+            print(f"Saving: Name={customer.name}, Date={customer.date}, Time={customer.time}")
+            customer.save()
+            messages.success(request, "Successfully updated your details. Wait for admin approval.")
+            return redirect("edit", id=id)  # ✅ Redirect back to `edit.html` so message is displayed
+        except Exception as e:
+            messages.error(request, f"An error occurred: {e}")
+            return redirect("edit", id=id)
 
-        customer.save()
-        return redirect("booked")
+    return render(request, 'edit.html', {'customer': customer})
 
-    return render(request, 'edit.html', {'Customer': customer})
-
-
+# Send Inquiry Email
 def send_inquiry_email(request):
     if request.method == 'POST':
         try:
-            name = request.POST.get('name', 'Unknown')
-            email = request.POST.get('email', 'No Email Provided')
-            phone = request.POST.get('phone', 'N/A')
-            message = request.POST.get('message', 'No Message')
-
-            subject = "New Inquiry Received"
-            body = f"Name: {name}\nEmail: {email}\nPhone: {phone}\nMessage: {message}"
-
-            send_mail(subject, body, settings.EMAIL_HOST_USER, ['fatmahussein355@gmail.com'])
-
+            send_mail(
+                "New Inquiry Received",
+                f"Name: {request.POST.get('name', 'Unknown')}\nEmail: {request.POST.get('email', 'No Email Provided')}\nPhone: {request.POST.get('phone', 'N/A')}\nMessage: {request.POST.get('message', 'No Message')}",
+                settings.EMAIL_HOST_USER,
+                ['fatmahussein355@gmail.com']
+            )
             return JsonResponse({'success': True, 'message': 'Inquiry sent successfully!'})
         except Exception as e:
             return JsonResponse({'success': False, 'message': f'Error: {str(e)}'}, status=500)
-
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
 
-def moreartist(request):
-    moreartist = Moreartist.objects.all()
-    footer = Footer.objects.all()
-    return render(request, "moreartist.html", {"moreartist": moreartist, "footer": footer})
-
-
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib import messages
-from .models import Reservation
-
-# ✅ Fetch Reservations and Return JSON Response
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib import messages
-from django.urls import reverse
-from django.http import HttpResponseRedirect
-from .models import Customer
-
+# Approve and Disapprove Customers
 def approve_customer(request, customer_id):
     customer = get_object_or_404(Customer, id=customer_id)
     customer.is_approved = True
     customer.save()
     messages.success(request, f"{customer.name} has been approved.")
-    return HttpResponseRedirect(reverse('admin:usanii_customer_changelist'))
+    return redirect('booked')
 
 def disapprove_customer(request, customer_id):
     customer = get_object_or_404(Customer, id=customer_id)
     customer.is_approved = False
     customer.save()
     messages.error(request, f"{customer.name} has been disapproved.")
-    return HttpResponseRedirect(reverse('admin:usanii_customer_changelist'))
+    return redirect('booked')
 
-
+def moreartist(request):
+    moreartists = Moreartist.objects.all()
+    footer = Footer.objects.all()
+    return render(request, "moreartist.html", {"moreartists": moreartists, "footer": footer})
