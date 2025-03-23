@@ -134,3 +134,6 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'fatmahussein355@gmail.com'  # Replace with your Gmail
 EMAIL_HOST_PASSWORD = 'rhvnjhxqtfpbxgbw'  # Use App Password for security
 
+
+LOGIN_REDIRECT_URL = 'home'  # Redirect to home after login
+LOGOUT_REDIRECT_URL = 'login'  # Redirect to login after logout

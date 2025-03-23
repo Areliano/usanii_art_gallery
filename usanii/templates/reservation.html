@@ -4,81 +4,91 @@
 
 {% block body %}
 
-
     <section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/art6.jpg' %}'); height: 100vh; background-size: cover;" data-stellar-background-ratio="0.5">
       <div class="overlay"></div>
       <div class="container">
         <div class="row no-gutters slider-text align-items-center justify-content-center">
-          <div class="col-md-9 ftco-animate text-center" style="background: #ffc4c4" >
+          <div class="col-md-9 ftco-animate text-center" style="background: #ffc4c4">
             <h1 class="mb-2 bread">Make Reservation</h1>
-            <p class="breadcrumbs"><span class="mr-2"><a href="{% url 'home' %}">Home <i class="ion-ios-arrow-forward"></i></a></span> <span>Exhibition Reservation <i class="ion-ios-arrow-forward"></i></span></p>
+            <p class="breadcrumbs">
+              <span class="mr-2"><a href="{% url 'home' %}">Home <i class="ion-ios-arrow-forward"></i></a></span>
+              <span>Exhibition Reservation <i class="ion-ios-arrow-forward"></i></span>
+            </p>
           </div>
         </div>
       </div>
     </section>
 
-		<section class="ftco-section ftco-no-pt ftco-no-pb"style="background: #ffc4c4" >
-			<div class="container">
-				<div class="row d-flex">
+    <section class="ftco-section ftco-no-pt ftco-no-pb" style="background: #ffc4c4">
+      <div class="container">
+        <div class="row d-flex">
           <div class="col-md-5 ftco-animate img img-2" style="background-image: url({% static 'images/art7.jpg' %});"></div>
           <div class="col-md-7 ftco-animate makereservation p-4 p-md-5">
-          	<div class="heading-section ftco-animate mb-5">
-	          	<span class="subheading">Book an Exhibition/Event</span>
-	            <h2 class="mb-4">Make Reservation with us</h2>
-	          </div>
-            <form action="/insertdata" method="POST">
+            <div class="heading-section ftco-animate mb-5">
+              <span class="subheading">Book an Exhibition/Event</span>
+              <h2 class="mb-4">Make Reservation with us</h2>
+            </div>
 
-                {% csrf_token %}
+            <!-- ✅ FIXED FORM ACTION -->
+            <form action="{% url 'insertdata' %}" method="POST">
+              {% csrf_token %}
 
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label for="">Name</label>
-                    <input type="text" class="form-control" placeholder="Your Name" name="name">
+                    <label for="name">Name</label>
+                    <input type="text" class="form-control" placeholder="Your Name" name="name" required>
                   </div>
                 </div>
+
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label for="">Email</label>
-                    <input type="email" class="form-control" placeholder="Your Email" name="email">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control" placeholder="Your Email" name="email" required>
                   </div>
                 </div>
+
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label for="">Phone</label>
-                    <input type="text" class="form-control" placeholder="Phone" name="phone">
+                    <label for="phone">Phone</label>
+                    <input type="text" class="form-control" placeholder="Phone" name="phone" required>
                   </div>
                 </div>
+
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label for="">Date</label>
-                    <input type="text" class="form-control"  placeholder="dd/mm/yyyy" name="date">
+                    <label for="date">Date</label>
+                    <input type="text" class="form-control" placeholder="dd/mm/yyyy" name="date" required>
                   </div>
                 </div>
+
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label for="">Time</label>
-                    <input type="text" class="form-control" placeholder="HH.MM 24-hr clock system" name="time">
+                    <label for="time">Time</label>
+                    <input type="text" class="form-control" placeholder="HH:
+
+                    MM 24-hr clock system" name="time" required>
                   </div>
                 </div>
+
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label for="">Name of Event/Exhibition</label>
-                      <input type="text" name="Event/Exhibition name" class="form-control" placeholder="e.g Africa Theme Event">
-                    </div>
+                    <label for="event">Name of Event/Exhibition</label>
+                    <input type="text" name="event" class="form-control" placeholder="e.g Africa Theme Event" required>
                   </div>
                 </div>
-                <div class="col-md-12 mt-3">
-                  <div class="form-group">
-                    <input type="submit" value="Book Exhibition" class="btn btn-primary py-3 px-5">
-                  </div>
+              </div>
+
+              <div class="col-md-12 mt-3">
+                <div class="form-group">
+                  <input type="submit" value="Book Exhibition" class="btn btn-primary py-3 px-5">
                 </div>
+              </div>
+
             </form>
           </div>
         </div>
-			</div>
-		</section>
+      </div>
+    </section>
 
 {% endblock %}
-
-

@@ -46,7 +46,7 @@ class Artworks(models.Model):
 class Exhibitions(models.Model):
     title = models.CharField(max_length=255)
     image = models.ImageField(upload_to='exhibitions/')
-    date = models.DateField()
+    date = models.CharField(max_length=200, default='Saturday')
     description = models.TextField(max_length=1000, default='This is an exhibition')
 
     def __str__(self):
@@ -91,7 +91,23 @@ class Customer(models.Model):
 
     def __str__(self):
         return self.name
+class Reservation(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
 
+    name = models.CharField(max_length=255)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20)
+    date = models.CharField(max_length=20)  # Consider using models.DateField()
+    time = models.CharField(max_length=10)  # Consider using models.TimeField()
+    event = models.CharField(max_length=255)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+
+    def __str__(self):
+        return f"{self.name} - {self.event} ({self.status})"
 class Moreartist(models.Model):
     name = models.CharField(max_length=500, default='text1')
     image = models.ImageField(upload_to='moreatist', default='moreartist.jpg')
