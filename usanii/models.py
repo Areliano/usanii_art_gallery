@@ -88,26 +88,23 @@ class Customer(models.Model):
     date = models.CharField(max_length=10, default='dd/mm/yyyy')
     time = models.TimeField(max_length=50, default=timezone.now)
     event = models.CharField(max_length=300, blank=False, default='Opening Event')
+    is_approved = models.BooleanField(null=True, default=None)  # Status field
 
     def __str__(self):
         return self.name
-class Reservation(models.Model):
-    STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
-    ]
 
+
+class Reservation(models.Model):
     name = models.CharField(max_length=255)
     email = models.EmailField()
-    phone = models.CharField(max_length=20)
-    date = models.CharField(max_length=20)  # Consider using models.DateField()
-    time = models.CharField(max_length=10)  # Consider using models.TimeField()
+    phone = models.CharField(max_length=15)
     event = models.CharField(max_length=255)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    is_approved = models.BooleanField(default=False)  # Status field
 
     def __str__(self):
-        return f"{self.name} - {self.event} ({self.status})"
+        return self.name
+
+
 class Moreartist(models.Model):
     name = models.CharField(max_length=500, default='text1')
     image = models.ImageField(upload_to='moreatist', default='moreartist.jpg')

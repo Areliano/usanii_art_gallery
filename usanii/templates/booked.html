@@ -19,46 +19,49 @@
 
 
 <div class="container-fluid"style="background: #ffc4c4" >
-<!--<div class="container"> -->
+
 <table class="table mt-5 mb-5">
   <thead>
     <tr>
-      <th scope="col">#</th>
-      <th scope="col">Name</th>
-      <th scope="col">Email</th>
-      <th scope="col">Phone number</th>
-      <th scope="col">Date</th>
-      <th scope="col">Time</th>
-        <th scope="col">Event/Exhibition Name</th>
-      <th scope="col">Edit</th>
-      <th scope="col">Delete</th>
+      <th>#</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Phone</th>
+      <th>Event/Exhibition</th>
+      <th>Status</th>
+      <th>Edit</th>
+      <th>Delete</th>
     </tr>
   </thead>
   <tbody>
-
-      {% for t in data %}
-
-           <tr>
-             <th scope="row">{{ t.id }}</th>
-             <th scope="row">{{ t.name }}</th>
-             <td>{{ t.email }}</td>
-               <td>{{ t.phone }}</td>
-             <td>{{ t.date }}</td>
-             <td>{{ t.time }}</td>
-             <td>{{ t.event }}</td>
-               <td>
-                   <a class="btn btn-warning" href="/edit/{{ t.id }}">Edit</a>
-               </td>
-               <td>
-                   <a class="btn btn-danger" href="/delete/{{ t.id }}">Delete</a>
-               </td>
-
-           </tr>
-      {% endfor %}
+    {% if data %}
+    {% for t in data %}
+        <tr>
+            <td>{{ t.id }}</td>
+            <td>{{ t.name }}</td>
+            <td>{{ t.email }}</td>
+            <td>{{ t.phone }}</td>
+            <td>{{ t.event }}</td>
+            <td>
+                {% if t.is_approved == True %}
+                    <span class="text-success">Approved</span>
+                {% elif t.is_approved == False %}
+                    <span class="text-danger">Disapproved</span>
+                {% else %}
+                    <span class="text-warning">In Review</span>
+                {% endif %}
+            </td>
+            <td><a class="btn btn-warning" href="/edit/{{ t.id }}">Edit</a></td>
+            <td><a class="btn btn-danger" href="/delete/{{ t.id }}">Delete</a></td>
+        </tr>
+    {% endfor %}
+{% else %}
+    <tr><td colspan="8" class="text-center">No bookings found</td></tr>
+{% endif %}
 
   </tbody>
-<!-- </div> -->
 </table>
+
 </div>
 
 {% endblock %}

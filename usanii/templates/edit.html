@@ -4,12 +4,11 @@
 
 {% block body %}
 
-
     <section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/art6.jpg' %}'); height: 100vh; background-size: cover;" data-stellar-background-ratio="0.5">
       <div class="overlay"></div>
       <div class="container">
         <div class="row no-gutters slider-text align-items-center justify-content-center">
-          <div class="col-md-9 ftco-animate text-center" style="background: #ffc4c4" >
+          <div class="col-md-9 ftco-animate text-center" style="background: #ffc4c4">
             <h1 class="mb-2 bread">Edit Your Reservation</h1>
             <p class="breadcrumbs"><span class="mr-2"><a href="{% url 'home' %}">Home <i class="ion-ios-arrow-forward"></i></a></span> <span>Edit Your Reservation <i class="ion-ios-arrow-forward"></i></span></p>
           </div>
@@ -17,16 +16,17 @@
       </div>
     </section>
 
-		<section class="ftco-section ftco-no-pt ftco-no-pb">
-			<div class="container">
-				<div class="row d-flex">
+    <section class="ftco-section ftco-no-pt ftco-no-pb" style="background: #ffc4c4">
+      <div class="container">
+        <div class="row d-flex">
           <div class="col-md-5 ftco-animate img img-2" style="background-image: url({% static 'images/art7.jpg' %});"></div>
           <div class="col-md-7 ftco-animate makereservation p-4 p-md-5">
-          	<div class="heading-section ftco-animate mb-5">
-	          	<span class="subheading">Rebook an Event/Exhibition</span>
-	            <h2 class="mb-4">Edit Reservation</h2>
-	          </div>
-            <form action="/edit/{{ Customer.id }}" method="POST">
+            <div class="heading-section ftco-animate mb-5">
+              <span class="subheading">Rebook an Event/Exhibition</span>
+              <h2 class="mb-4">Edit Reservation</h2>
+            </div>
+           <!-- <form action="/edit/{{ Customer.id }}/" method="POST"> -->
+              <form action="{% url 'edit' Customer.id %}" method="POST">
 
                 {% csrf_token %}
 
@@ -52,21 +52,21 @@
                 <div class="col-md-6">
                   <div class="form-group">
                     <label for="">Date</label>
-                    <input type="date" class="form-control" placeholder="Date" name="datetime" value="{{ Customer.date }}">
+                    <input type="date" class="form-control" placeholder="Date" name="datetime" value="{{ Customer.date|date:'Y-m-d' }}">
                   </div>
                 </div>
                 <div class="col-md-6">
                   <div class="form-group">
                     <label for="">Time</label>
-                    <input type="text" class="form-control" placeholder="Time" name="time" value="{{ Customer.time}}">
+                    <input type="text" class="form-control" placeholder="Time" name="time" value="{{ Customer.time }}">
                   </div>
                 </div>
                 <div class="col-md-6">
                   <div class="form-group">
                     <label for="">Name of event/exhibition</label>
-                      <input type="text" name="Exhibition/Event name" class="form-control" placeholder="e.g Africa Themed Event" value="{{ Customer.event }}">
-                    </div>
+                    <input type="text" name="event_name" class="form-control" placeholder="e.g Africa Themed Event" value="{{ Customer.event }}">
                   </div>
+                </div>
 
                 <div class="col-md-12 mt-3">
                   <div class="form-group">
@@ -77,8 +77,7 @@
             </form>
           </div>
         </div>
-			</div>
-		</section>
+      </div>
+    </section>
 
 {% endblock %}
-

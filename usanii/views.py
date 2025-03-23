@@ -133,9 +133,14 @@ def reservation(request):
     footer = Footer.objects.all()
     return render(request, "reservation.html", {"footer": footer})
 
+#def booked(request):
+ #   customers = Customer.objects.all()
+#    footer = Footer.objects.all()
+ #   return render(request, "booked.html", {"data": customers, "footer": footer})
 def booked(request):
-    customers = Customer.objects.all()
+    customers = Customer.objects.all()  # Fetch from correct model
     footer = Footer.objects.all()
+    print(customers)
     return render(request, "booked.html", {"data": customers, "footer": footer})
 
 def delete(request, id):
@@ -195,3 +200,32 @@ def moreartist(request):
     moreartist = Moreartist.objects.all()
     footer = Footer.objects.all()
     return render(request, "moreartist.html", {"moreartist": moreartist, "footer": footer})
+
+
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from .models import Reservation
+
+# ✅ Fetch Reservations and Return JSON Response
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from django.urls import reverse
+from django.http import HttpResponseRedirect
+from .models import Customer
+
+def approve_customer(request, customer_id):
+    customer = get_object_or_404(Customer, id=customer_id)
+    customer.is_approved = True
+    customer.save()
+    messages.success(request, f"{customer.name} has been approved.")
+    return HttpResponseRedirect(reverse('admin:usanii_customer_changelist'))
+
+def disapprove_customer(request, customer_id):
+    customer = get_object_or_404(Customer, id=customer_id)
+    customer.is_approved = False
+    customer.save()
+    messages.error(request, f"{customer.name} has been disapproved.")
+    return HttpResponseRedirect(reverse('admin:usanii_customer_changelist'))
+
+
