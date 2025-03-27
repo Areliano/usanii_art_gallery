@@ -219,6 +219,6 @@ def disapprove_customer(request, customer_id):
     return redirect('booked')
 
 def moreartist(request):
-    moreartists = Moreartist.objects.all()
+    moreartist = Moreartist.objects.all()
     footer = Footer.objects.all()
-    return render(request, "moreartist.html", {"moreartists": moreartists, "footer": footer})
+    return render(request, "moreartist.html", {"moreartist": moreartist, "footer": footer})
