@@ -9,7 +9,13 @@ from .models import (
 )
 
 
-# Customizing User Admin to Allow Activation from Admin Panel
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.conf import settings
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils.html import strip_tags  # Add this import
+
+
 class CustomUserAdmin(BaseUserAdmin):
     list_display = ('username', 'email', 'is_active', 'is_staff', 'is_superuser')
     list_filter = ('is_active', 'is_staff', 'is_superuser')
@@ -17,16 +23,42 @@ class CustomUserAdmin(BaseUserAdmin):
     actions = ['approve_users']
 
     def approve_users(self, request, queryset):
-        queryset.update(is_active=True)
-        self.message_user(request, "Selected users have been approved.")
+        for user in queryset:
+            if not user.is_active:
+                user.is_active = True
+                user.save()
 
-    approve_users.short_description = "Approve selected users"
+                current_site = get_current_site(request)
+                domain = current_site.domain
+                protocol = 'https' if request.is_secure() else 'http'
+
+                subject = 'Your Usanii Art Gallery Account Has Been Approved'
+                message = render_to_string('account_approved_email.html', {
+                    'user': user,
+                    'protocol': protocol,
+                    'domain': domain,
+                })
+
+                try:
+                    send_mail(
+                        subject,
+                        strip_tags(message),  # Plain text version
+                        settings.DEFAULT_FROM_EMAIL,
+                        [user.email],
+                        fail_silently=False,
+                        html_message=message  # HTML version
+                    )
+                    self.message_user(request, f"Approval email sent to {user.email}")
+                except Exception as e:
+                    self.message_user(request, f"Failed to send email to {user.email}: {str(e)}", level='ERROR')
+
+        self.message_user(request, f"{queryset.count()} users approved successfully")
+
+    approve_users.short_description = "Approve selected users and send notification"
 
 
-# Unregister default User admin and register the customized one
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
-
 
 # Exhibition Admin with Booking Count
 class ExhibitionAdmin(admin.ModelAdmin):

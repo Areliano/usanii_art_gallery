@@ -4,38 +4,43 @@
 {% block body %}
 
 <section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/art.png' %}'); height: 100vh; background-size: cover;" data-stellar-background-ratio="0.5">
-    <div class="overlay"></div>
-    <div class="container">
-        <div class="row no-gutters slider-text align-items-center justify-content-center">
-            <div class="col-md-9 ftco-animate text-center" style="background: #ffc4c4">
-                <h1 class="mb-2 bread">Artworks</h1>
-                <p class="breadcrumbs"><span class="mr-2"><a href="{% url 'home' %}">Home <i class="ion-ios-arrow-forward"></i></a></span> <span>Artworks <i class="ion-ios-arrow-forward"></i></span></p>
-            </div>
-        </div>
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row no-gutters slider-text align-items-center justify-content-center">
+      <div class="col-md-9 ftco-animate text-center" style="background: rgba(255, 196, 196, 0.7); border-radius: 10px; padding: 40px;">
+        <h1 class="mb-2 bread" style="font-family: 'Georgia', serif; color: #5e2f4e;">Artworks</h1>
+        <p class="breadcrumbs" style="color: #5e2f4e;">
+          <span class="mr-2"><a href="{% url 'home' %}" style="color: #5e2f4e;">Home <i class="ion-ios-arrow-forward"></i></a></span>
+          <span>Artworks <i class="ion-ios-arrow-forward"></i></span>
+        </p>
+      </div>
     </div>
+  </div>
 </section>
 
-<section class="ftco-section" style="background: white">
+
+<section class="ftco-section" style="background: white; padding-top: 50px;">
     <div class="container">
         <div class="row justify-content-center mb-5 pb-2">
             <div class="col-md-7 text-center heading-section ftco-animate">
-                <span class="subheading">Our Artworks</span>
-                <h2 class="mb-4">Explore Artworks Made by our Artists</h2>
+                <span class="subheading mb-2" style="color: #FF6F61; font-weight: bold; font-family: 'Poppins', sans-serif;">Our Artworks</span>
+                <h2 class="mb-4" style="font-family: 'Roboto', sans-serif; color: #2c3e50;">Explore Artworks Made by our Artists</h2>
             </div>
         </div>
 
         <div class="row">
             {% for artworks in artworks %}
             <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="img-container" style="background-image: url('{{ artworks.image.url }}');"></div>
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Art Title: {{ artworks.title }}</h5>
-                        <p class="card-text">Artist Name: {{ artworks.name }}</p>
-                        <p class="card-text">Artwork Price: Kshs. {{ artworks.price }}</p>
+                <div class="card" style="border-radius: 12px; box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);">
+                    <div class="img-container" style="background-image: url('{{ artworks.image.url }}'); height: 300px; background-size: cover; background-position: center; border-radius: 12px;"></div>
+                    <div class="card-body text-center" style="padding: 20px;">
+                        <h5 class="card-title" style="font-family: 'Roboto', sans-serif; color: #34495e;">Art Title: {{ artworks.title }}</h5>
+                        <p class="card-text" style="color: #7f8c8d; font-size: 1rem;">Artist Name: {{ artworks.name }}</p>
+                        <p class="card-text" style="color: #e74c3c; font-size: 1.2rem;">Artwork Price: Kshs. {{ artworks.price }}</p>
 
                         <button class="btn {% if artworks.available %}btn-success{% else %}btn-danger{% endif %} inquiry-btn"
-                            data-title="{{ artworks.title }}" data-image="{{ artworks.image.url }}">
+                            data-title="{{ artworks.title }}" data-image="{{ artworks.image.url }}"
+                            style="padding: 10px 20px; font-size: 1rem; border-radius: 30px; border: none; transition: background-color 0.3s ease;">
                             {% if artworks.available %}
                                 Available
                             {% else %}
@@ -51,39 +56,40 @@
 
     <!-- Inquiry Form Modal -->
     <div id="inquiryModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h3>Enquiry Form</h3>
-            <div class="modal-body">
-                <img id="modal-art-image" src="" alt="Artwork Image" class="img-fluid mb-3">
-                <h5 id="modal-art-title"></h5>
+        <div class="modal-content" style="border-radius: 15px; padding: 20px; box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);">
+            <span class="close" style="font-size: 25px; color: #e74c3c; cursor: pointer;">&times;</span>
+            <h3 style="font-family: 'Roboto', sans-serif; color: #2c3e50;">Enquiry Form</h3>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <img id="modal-art-image" src="" alt="Artwork Image" class="img-fluid mb-3" style="border-radius: 12px;">
+                <h5 id="modal-art-title" style="font-family: 'Roboto', sans-serif; color: #34495e;"></h5>
                 <form id="inquiryForm" method="POST" action="{% url 'send-inquiry' %}">
                     {% csrf_token %}
 
-                    <label for="name">Name *</label>
-                    <input type="text" id="name" name="name" required> <br>
+                    <label for="name" style="font-family: 'Roboto', sans-serif;">Name *</label>
+                    <input type="text" id="name" name="name" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 10px;">
 
-                    <label for="email">Email *</label>
-                    <input type="email" id="email" name="email" required> <br>
+                    <label for="email" style="font-family: 'Roboto', sans-serif;">Email *</label>
+                    <input type="email" id="email" name="email" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 10px;">
 
-                    <label for="phone">Phone</label>
-                    <input type="text" id="phone" name="phone" required> <br>
+                    <label for="phone" style="font-family: 'Roboto', sans-serif;">Phone</label>
+                    <input type="text" id="phone" name="phone" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 10px;">
 
-                    <label for="message">Message</label>
-                    <textarea id="message" name="message"></textarea> <br>
+                    <label for="message" style="font-family: 'Roboto', sans-serif;">Message</label>
+                    <textarea id="message" name="message" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 10px;"></textarea>
 
+                    <label style="font-family: 'Roboto', sans-serif;">Receive newsletters? *</label>
+                    <div class="newsletter-options">
+                        <label for="newsletter-yes">
+                            <input type="radio" id="newsletter-yes" name="newsletter" value="yes" required> Yes
+                        </label>
+                        <label for="newsletter-no">
+                            <input type="radio" id="newsletter-no" name="newsletter" value="no" required> No
+                        </label>
+                    </div>
 
-                    <label>Receive newsletters? *</label>
-<div class="newsletter-options">
-    <label for="newsletter-yes"><input type="radio" id="newsletter-yes" name="newsletter" value="yes" required> Yes</label>
-    <label for="newsletter-no"><input type="radio" id="newsletter-no" name="newsletter" value="no" required> No</label>
-</div>
-
-
-                    <button type="submit" class="btn btn-primary">Send Enquiry</button>
-                    <br>
+                    <button type="submit" class="btn btn-primary" style="padding: 10px 20px; font-size: 1rem; border-radius: 30px; border: none; background-color: #e74c3c; color: white;">Send Enquiry</button>
                 </form>
-                <p id="formResponse" style="display: none;"></p>
+                <p id="formResponse" style="display: none; padding-top: 10px;"></p>
             </div>
         </div>
     </div>
@@ -99,7 +105,7 @@
         top: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.7);
         justify-content: center;
         align-items: center;
         overflow: hidden;
@@ -108,57 +114,72 @@
     .modal-content {
         background: white;
         padding: 20px;
-        border-radius: 10px;
-        max-width: 400px;
+        border-radius: 15px;
+        max-width: 500px;
         position: relative;
-        overflow-y: auto; /* Enables scrolling */
-        max-height: 90vh; /* Prevents form from overflowing */
+        overflow-y: auto;
     }
 
     .close {
         position: absolute;
-        top: 10px;
-        right: 15px;
-        font-size: 20px;
+        top: 15px;
+        right: 20px;
+        font-size: 25px;
+        color: #e74c3c;
         cursor: pointer;
     }
 
     .modal-body {
-        max-height: 80vh;
+        max-height: 70vh;
         overflow-y: auto;
     }
 
     .img-container {
-        height: 500px;
+        height: 300px;
         background-size: cover;
         background-position: center;
-        border-radius: 8px;
+        border-radius: 12px;
     }
 
     .card {
-        min-height: 600px;
-        padding: 15px;
+        min-height: 400px;
         border-radius: 12px;
-        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
     }
 
-    /* Fix form overflow */
-    input, textarea {
-        width: 100%;
-        padding: 5px;
-        margin-bottom: 10px;
+    .card-body {
+        padding: 20px;
+    }
+
+    .btn {
+        border-radius: 30px;
+        padding: 10px 20px;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-success:hover {
+        background-color: #2ecc71;
+    }
+
+    .btn-danger:hover {
+        background-color: #e74c3c;
+    }
+
+    .btn-primary:hover {
+        background-color: #c0392b;
     }
 
     .newsletter-options {
-    display: flex;
-    gap: 15px; /* Spacing between Yes and No */
-    align-items: center;
+        display: flex;
+        gap: 15px;
+        align-items: center;
     }
 
     .newsletter-options label {
-    display: flex;
-    align-items: center;
-    gap: 5px; /* Space between radio button and text */
+        display: flex;
+        align-items: center;
+        gap: 5px;
     }
 
 </style>
@@ -192,13 +213,38 @@
             }
         });
 
-        // AJAX Form Submission
+        // Form Validation and AJAX Submission
         inquiryForm.addEventListener("submit", function (event) {
-            event.preventDefault();  // Prevent normal form submission
+            event.preventDefault();
 
+            // Validate Name (only letters and spaces allowed)
+            const nameField = document.getElementById("name");
+            const nameRegex = /^[A-Za-z\s]+$/;
+            if (!nameRegex.test(nameField.value)) {
+                alert("Name can only contain letters and spaces.");
+                return;
+            }
+
+            // Validate Email (must be a valid email format)
+            const emailField = document.getElementById("email");
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailRegex.test(emailField.value)) {
+                alert("Invalid email address.");
+                return;
+            }
+
+            // Validate Phone (must be exactly 10 digits)
+            const phoneField = document.getElementById("phone");
+            const phoneRegex = /^\d{10}$/;
+            if (!phoneRegex.test(phoneField.value)) {
+                alert("Phone number should be exactly 10 digits.");
+                return;
+            }
+
+            // If validation passes, proceed with AJAX submission
             const formData = new FormData(inquiryForm);
 
-            fetch(inquiryForm.action, {  // Using the form action dynamically
+            fetch(inquiryForm.action, {
                 method: "POST",
                 body: formData,
                 headers: {
@@ -224,5 +270,6 @@
         });
     });
 </script>
+
 
 {% endblock %}

@@ -8,6 +8,7 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Usanii Mashariki</title>
+
     <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Lovers+Quarrel" rel="stylesheet">
 
@@ -22,11 +23,76 @@
     <link rel="stylesheet" href="{% static 'css/jquery.timepicker.css' %}">
     <link rel="stylesheet" href="{% static 'css/flaticon.css' %}">
     <link rel="stylesheet" href="{% static 'css/icomoon.css' %}">
+
+   <!-- Custom Theme Colors -->
+<style>
+    body {
+        background-color: #FFFFFF;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .navbar, .ftco-footer {
+        background-color: #5e2f4e; /* Corrected background color for navbar and footer */
+    }
+
+    .navbar .nav-link, .navbar-brand {
+        color: #FFFFFF !important;
+    }
+
+    .navbar .nav-link:hover, .navbar .nav-item.active .nav-link {
+        color: #FF6F61 !important;
+    }
+
+    .btn, .form-control.submit {
+        background-color: #88B04B;
+        color: white;
+    }
+
+    .btn:hover, .form-control.submit:hover {
+        background-color: #6B5B95;
+    }
+
+    .ftco-footer {
+        background-color: #5e2f4e !important; /* Ensure footer has the exact color you want */
+    }
+
+    .ftco-footer .ftco-heading-2,
+    .ftco-footer .icon-twitter,
+    .ftco-footer .icon-facebook,
+    .ftco-footer .icon-instagram {
+        color: #FFFFFF; /* Changed to white for better visibility on dark background */
+    }
+
+    .ftco-footer p,
+    .ftco-footer a,
+    .ftco-footer span {
+        color: #FFFFFFcc; /* Set text color to a lighter shade for better contrast */
+    }
+
+    .thumb-menu {
+        border: 2px solid #F7CAC9;
+    }
+
+    .open-hours span:first-child {
+        color: #ffffffcc;
+    }
+
+    .open-hours span:last-child {
+        color: #ffffffcc;
+    }
+
+    /* Loader spinner */
+    .circular .path {
+        stroke: #FF6F61 !important;
+    }
+</style>
+
+
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
+<nav class="navbar navbar-expand-lg navbar-dark ftco_navbar" id="ftco-navbar">
     <div class="container">
         <a class="navbar-brand" href="{% url 'home' %}">Usanii Mashariki Art Gallery</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,7 +122,6 @@
                 <li class="nav-item {% if nav == 'contact' %} active {% endif %}">
                     <a href="{% url 'contact' %}" class="nav-link">Contact</a>
                 </li>
-
                 {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'logout' %}">Logout</a>
@@ -69,81 +134,78 @@
 <!-- END nav -->
 
 {% block body %}
-
 {% endblock %}
 
 {% for footer in footer %}
-    <footer class="ftco-footer ftco-bg-dark ftco-section">
-        <div class="container">
-            <div class="row mb-5">
-                <div class="col-md-6 col-lg-3">
-                    <div class="ftco-footer-widget mb-4">
-                        <h2 class="ftco-heading-2">{{ footer.heading }}</h2>
-                        <p>{{ footer.about }}</p>
-                        <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-3">
-                            <li class="ftco-animate"><a href="{{ footer.twitter }}" target="_blank"><span class="icon-twitter"></span></a></li>
-                            <li class="ftco-animate"><a href="{{ footer.facebook }}" target="_blank"><span class="icon-facebook"></span></a></li>
-                            <li class="ftco-animate"><a href="{{ footer.instagram }}" target="_blank"><span class="icon-instagram"></span></a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="ftco-footer-widget mb-4">
-                        <h2 class="ftco-heading-2">{{ footer.open_days }}</h2>
-                        <ul class="list-unstyled open-hours">
-                            <li class="d-flex"><span>Monday</span><span>07:00hrs - 21:00hrs</span></li>
-                            <li class="d-flex"><span>Tuesday</span><span>07:00hrs - 21:00hrs</span></li>
-                            <li class="d-flex"><span>Wednesday</span><span>07:00hrs - 21:00hrs</span></li>
-                            <li class="d-flex"><span>Thursday</span><span>07:00hrs - 21:00hrs</span></li>
-                            <li class="d-flex"><span>Friday</span><span>07:00hrs - 21:00hrs</span></li>
-                            <li class="d-flex"><span>Saturday</span><span>07:00hrs - 21:00hrs</span></li>
-                            <li class="d-flex"><span>Sunday</span><span>07:00hrs - 16:00hrs</span></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="ftco-footer-widget mb-4">
-                        <h2 class="ftco-heading-2">Newsletter</h2>
-                        <p>{{ footer.newsletter }}</p>
-                        <form action="#" class="subscribe-form">
-                            <div class="form-group">
-                                <input type="text" class="form-control mb-2 text-center" placeholder="Enter email address">
-                                <input type="submit" value="Subscribe" class="form-control submit px-3">
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="ftco-footer-widget mb-4">
-                        <h2 class="ftco-heading-2">Instagram</h2>
-                        <div class="thumb d-sm-flex">
-                            <a href="#" class="thumb-menu img" style="background-image: url('{{ footer.image1.url }}')"></a>
-                            <a href="#" class="thumb-menu img" style="background-image: url('{{ footer.image2.url }}');"></a>
-                            <a href="#" class="thumb-menu img" style="background-image: url('{{ footer.image3.url }}');"></a>
-                        </div>
-                        <div class="thumb d-flex">
-                            <a href="#" class="thumb-menu img" style="background-image: url('{{ footer.image4.url }}');"></a>
-                            <a href="#" class="thumb-menu img" style="background-image: url('{{ footer.image5.url }}');"></a>
-                            <a href="#" class="thumb-menu img" style="background-image: url('{{ footer.image6.url }}');"></a>
-                        </div>
-                    </div>
+<footer class="ftco-footer ftco-section">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-md-6 col-lg-3">
+                <div class="ftco-footer-widget mb-4">
+                    <h2 class="ftco-heading-2">{{ footer.heading }}</h2>
+                    <p>{{ footer.about }}</p>
+                    <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-3">
+                        <li class="ftco-animate"><a href="{{ footer.twitter }}" target="_blank"><span class="icon-twitter"></span></a></li>
+                        <li class="ftco-animate"><a href="{{ footer.facebook }}" target="_blank"><span class="icon-facebook"></span></a></li>
+                        <li class="ftco-animate"><a href="{{ footer.instagram }}" target="_blank"><span class="icon-instagram"></span></a></li>
+                    </ul>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-12 text-center">
-                    <p>
-                        <br><br>All rights reserved | Usanii Mashariki Art Gallery | Waterfront Mall | Karen | call at: +254792535807 | Email: info@usaniimashariki.com
-                        <br><br><br>
-                        Copyright &copy;<script>document.write(new Date().getFullYear());</script>
-                    </p>
+            <div class="col-md-6 col-lg-3">
+                <div class="ftco-footer-widget mb-4">
+                    <h2 class="ftco-heading-2">{{ footer.open_days }}</h2>
+                    <ul class="list-unstyled open-hours">
+                        <li class="d-flex"><span>Monday</span><span>07:00hrs - 21:00hrs</span></li>
+                        <li class="d-flex"><span>Tuesday</span><span>07:00hrs - 21:00hrs</span></li>
+                        <li class="d-flex"><span>Wednesday</span><span>07:00hrs - 21:00hrs</span></li>
+                        <li class="d-flex"><span>Thursday</span><span>07:00hrs - 21:00hrs</span></li>
+                        <li class="d-flex"><span>Friday</span><span>07:00hrs - 21:00hrs</span></li>
+                        <li class="d-flex"><span>Saturday</span><span>07:00hrs - 21:00hrs</span></li>
+                        <li class="d-flex"><span>Sunday</span><span>07:00hrs - 16:00hrs</span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="ftco-footer-widget mb-4">
+                    <h2 class="ftco-heading-2">Newsletter</h2>
+                    <p>{{ footer.newsletter }}</p>
+                    <form action="#" class="subscribe-form">
+                        <div class="form-group">
+                            <input type="text" class="form-control mb-2 text-center" placeholder="Enter email address">
+                            <input type="submit" value="Subscribe" class="form-control submit px-3">
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="ftco-footer-widget mb-4">
+                    <h2 class="ftco-heading-2">Instagram</h2>
+                    <div class="thumb d-sm-flex">
+                        <a href="#" class="thumb-menu img" style="background-image: url('{{ footer.image1.url }}')"></a>
+                        <a href="#" class="thumb-menu img" style="background-image: url('{{ footer.image2.url }}');"></a>
+                        <a href="#" class="thumb-menu img" style="background-image: url('{{ footer.image3.url }}');"></a>
+                    </div>
+                    <div class="thumb d-flex">
+                        <a href="#" class="thumb-menu img" style="background-image: url('{{ footer.image4.url }}');"></a>
+                        <a href="#" class="thumb-menu img" style="background-image: url('{{ footer.image5.url }}');"></a>
+                        <a href="#" class="thumb-menu img" style="background-image: url('{{ footer.image6.url }}');"></a>
+                    </div>
                 </div>
             </div>
         </div>
-    </footer>
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <p><br><br>All rights reserved | Usanii Mashariki Art Gallery | Waterfront Mall | Karen | call at: +254792535807 | Email: info@usaniimashariki.com<br><br><br>
+                    Copyright &copy;<script>document.write(new Date().getFullYear());</script>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
 {% endfor %}
 
 <!-- loader -->
-<div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00"/></svg></div>
+<div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#FF6F61"/></svg></div>
 
 <script src="{% static 'js/jquery.min.js' %}"></script>
 <script src="{% static 'js/jquery-migrate-3.0.1.min.js' %}"></script>
@@ -159,7 +221,6 @@
 <script src="{% static 'js/bootstrap-datepicker.js' %}"></script>
 <script src="{% static 'js/jquery.timepicker.min.js' %}"></script>
 <script src="{% static 'js/scrollax.min.js' %}"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&sensor=false"></script>
 <script src="{% static 'js/google-map.js' %}"></script>
 <script src="{% static 'js/main.js' %}"></script>
 

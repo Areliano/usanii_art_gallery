@@ -4,10 +4,9 @@
 
 {% block body %}
 
-
 {% for home in home %}
-    <section class="home-slider js-fullheight owl-carousel bg-white">
-      <div class="slider-item js-fullheight" style="background: #ffc4c4">
+    <section class="home-slider js-fullheight owl-carousel" style="background: white;">
+      <div class="slider-item js-fullheight" style="background: white;">
       	<div class="overlay"></div>
         <div class="container-fluid p-0">
           <div class="row d-md-flex no-gutters slider-text js-fullheight align-items-center justify-content-end" data-scrollax-parent="true">
@@ -15,10 +14,9 @@
           		<div class="overlay"></div>
           	</div>
 	          <div class="one-forth d-flex js-fullheight align-items-center ftco-animate" data-scrollax=" properties: { translateY: '70%' }">
-	          	<div class="text mt-md-4">
-
-					<h1 class="mt-1 mb-1" style="color: #000;">{{ home.heading }}</h1>
-                    <p class="mt-1 mb-1" style="color: #000;"> {{ home.description }} </p> <br><br><br>
+	          	<div class="text mt-md-4" style="color: #6B5B95; padding: 20px; border-radius: 10px; background-color: #F7CAC9;">
+					<h1 class="mt-1 mb-1" style="color: #FFFFFF; font-family: 'Arial', sans-serif; font-weight: bold;">{{ home.heading }}</h1>
+                    <p class="mt-1 mb-1" style="color: black;"> {{ home.description }} </p>
 		            </div>
 	            </div>
 	          </div>
@@ -29,33 +27,5 @@
 
 {% endfor %}
 
-
-
-
-
-{% for about in about %}
-		<section class="ftco-section ftco-wrap-about ftco-no-pb ftco-no-pt" style="background: #ffc4c4">
-			<div class="container-fluid">
-				<div class="row no-gutters">
-					<div class="col-sm-5 img img-2 d-flex align-items-center justify-content-center justify-content-md-end" style="background-image: url({% static 'images/about.jpg' %}); position: relative">
-                        <iframe width="900" height="600" src="https://www.youtube.com/embed/k-0GVe6t2pA?si=NoWEmQ_hgXizvzKK" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-					</div>
-					<div class="col-sm-7 wrap-about py-5 ftco-animate">
-	          <div class="heading-section mt-5 mb-4">
-	          	<div class="pl-lg-5 ml-md-5">
-		          	<span class="subheading mb-2">{{ about.heading }}</span>
-		            <h2 class="mb-4" style="color: #000;">{{ about.welcome }}</h2>
-	            </div>
-	          </div>
-	          <div class="pl-lg-5 ml-md-5">
-							<p style="color: #000;">{{ about.description }}</p>
-							<h3 class="mt-5" style="color: #333;">{{ about.special }}</h3>
-                            <p class="class" style="color: #333;">{{ about.cool }}</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</section>
-{% endfor %}
 
 {% endblock %}

@@ -5,45 +5,43 @@
 {% block body %}
 
     <section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/art6.jpg' %}'); height: 100vh; background-size: cover;" data-stellar-background-ratio="0.5">
-      <div class="overlay"></div>
-      <div class="container">
-        <div class="row no-gutters slider-text align-items-center justify-content-center">
-          <div class="col-md-9 ftco-animate text-center" style="background: #ffc4c4">
-            <h1 class="mb-2 bread">Our Artists</h1>
-            <p class="breadcrumbs"><span class="mr-2"><a href="{% url 'home' %}">Home <i class="ion-ios-arrow-forward"></i></a></span> <span>Artists <i class="ion-ios-arrow-forward"></i></span></p>
-          </div>
-        </div>
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row no-gutters slider-text align-items-center justify-content-center">
+      <div class="col-md-9 ftco-animate text-center" style="background: rgba(255, 196, 196, 0.7); border-radius: 10px; padding: 40px;">
+        <h1 class="mb-2 bread" style="font-family: 'Georgia', serif; color: #5e2f4e;">Our Artists</h1>
+        <p class="breadcrumbs" style="color: #5e2f4e;"><span class="mr-2"><a href="{% url 'home' %}" style="color: #5e2f4e;">Home <i class="ion-ios-arrow-forward"></i></a></span> <span>Artists <i class="ion-ios-arrow-forward"></i></span></p>
       </div>
-    </section>
+    </div>
+  </div>
+</section>
 
 
-		<section class="ftco-section" style="background: white" >
-			<div class="container">
-				<div class="row">
 
-{% for artists in artists %}
-          <div class="col-md-4 ftco-animate">
-            <div class="blog-entry">
-              <a href="{% url 'moreartist' %}" class="block-20" style="background-image: url('{{ artists.image.url }}');">
-              </a>
-              <div class="text px-4 pt-3 pb-4">
-                <div class="meta">
-                  <div><a href="#">{{ artists.date }}</a></div>
-                  <div><a href="#">{{ artists.name }}</a></div>
+	<section class="ftco-section" style="background: white;">
+		<div class="container">
+			<div class="row">
+
+            {% for artists in artists %}
+              <div class="col-md-4 ftco-animate">
+                <div class="blog-entry" style="border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); overflow: hidden;">
+                  <a href="{% url 'moreartist' %}" class="block-20" style="background-image: url('{{ artists.image.url }}'); height: 300px; background-size: cover; background-position: center; border-radius: 10px;">
+                  </a>
+                  <div class="text px-4 pt-3 pb-4" style="background: #F7CAC9; border-radius: 0 0 10px 10px;">
+                    <div class="meta" style="color: #6B5B95;">
+                      <div><a href="#" style="color: #6B5B95;">{{ artists.date }}</a></div>
+                      <div><a href="#" style="color: #6B5B95;">{{ artists.name }}</a></div>
+                    </div>
+                    <h3 class="heading" style="color: #FF6F61;"><a href="#">{{ artists.text1 }}</a></h3>
+                    <p class="clearfix">
+                      <a href="{% url 'moreartist' %}" class="float-left read" style="color: #white; font-weight: bold;">More About The Artist</a>
+                    </p>
+                  </div>
                 </div>
-                <h3 class="heading"><a href="#">{{ artists.text1 }}</a></h3>
-               <p class="clearfix">
-                  <a href="{% url 'moreartist' %}" class="float-left read">More About The Artist</a>
-                </p>
               </div>
+            {% endfor %}
             </div>
-          </div>
-         {% endfor %}
-          </div>
         </div>
-			</div>
-		</section>
+	</section>
 
 {% endblock %}
-
-

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Account Approved - Usanii Art Gallery</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #5e2f4e;">Welcome to Usanii Art Gallery!</h2>
+
+        <p>Hello {{ user.username }},</p>
+
+        <p>We're pleased to inform you that your account has been approved by our administrator.</p>
+
+        <p>You can now log in to your account and start exploring our gallery:</p>
+
+        <p style="text-align: center; margin: 30px 0;">
+            <a href="{{ protocol }}://{{ domain }}{% url 'login' %}"
+               style="background-color: #5e2f4e; color: white; padding: 10px 20px;
+                      text-decoration: none; border-radius: 4px;">
+                Login to Your Account
+            </a>
+        </p>
+
+        <p>If you have any questions, please don't hesitate to contact us.</p>
+
+        <p>Best regards,<br>
+        The Usanii Art Gallery Team</p>
+
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+
+        <p style="font-size: 12px; color: #999;">
+            If you're having trouble with the button above, copy and paste this link into your browser:<br>
+            {{ protocol }}://{{ domain }}{% url 'login' %}
+        </p>
+    </div>
+</body>
+</html>

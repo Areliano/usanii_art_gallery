@@ -20,20 +20,46 @@ from django.views.decorators.http import require_POST
 import json
 
 
-# User Registration with Admin Approval
+from django.template.loader import render_to_string
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.conf import settings
+from .forms import RegisterForm
+
+
 def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.is_active = False  # User remains inactive until approved
-            user.save()
-            messages.success(request, "Account created! Await admin approval.")
-            return redirect('login')
+            user = form.save()  # Let the form handle saving and is_active=False
+
+            # Send registration confirmation email
+            subject = 'Registration Successful - Awaiting Approval'
+            message = render_to_string('registration_confirmation_email.html', {
+                'user': user,
+            })
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+                html_message=message
+            )
+
+            messages.success(
+                request,
+                "Your account has been created successfully! Please wait for admin approval. "
+                "A confirmation email has been sent to your email address."
+            )
+            return redirect('registration_success')
     else:
         form = RegisterForm()
-    return render(request, 'register.html', {'form': form})
 
+    return render(request, 'register.html', {'form': form})
 
 # User Login (Only Approved Users)
 def user_login(request):
@@ -80,6 +106,8 @@ def activate(request, uidb64, token):
         messages.error(request, "Activation failed.")
     return redirect('home')
 
+def registration_success(request):
+    return render(request, 'registration_success.html')
 
 # Password Reset Views
 class CustomPasswordResetView(PasswordResetView):
@@ -112,7 +140,7 @@ def artists(request):
 def home(request):
     return render(request, 'home.html', {
         "home": Homepage.objects.all(),
-        "about": Aboutpage.objects.all(),
+       # "about": Aboutpage.objects.all(),
         "footer": Footer.objects.all()
     })
 
@@ -133,8 +161,54 @@ def exhibitions(request):
     })
 
 
+from django.core.mail import send_mail
+from django.shortcuts import render, redirect
+from django.conf import settings
+from django.contrib import messages
+import re
+from .models import Contact, Footer  # Make sure to import your models
+
+
 def contact(request):
-    return render(request, "contact.html", {"contact": Contact.objects.all(), "footer": Footer.objects.all()})
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        subject = request.POST.get('subject')
+        message = request.POST.get('message')
+
+        # Validation
+        if not re.match(r'^[A-Za-z\s]+$', name):
+            messages.error(request, 'Name should contain only letters and spaces')
+            return redirect('contact')
+
+        if not re.match(r'^[A-Za-z\s]+$', subject):
+            messages.error(request, 'Subject should contain only letters and spaces')
+            return redirect('contact')
+
+        if not email or '@' not in email:
+            messages.error(request, 'Please enter a valid email address')
+            return redirect('contact')
+
+        # Send email
+        try:
+            send_mail(
+                f"{subject} - From {name}",
+                f"Message from: {name} <{email}>\n\n{message}",
+                settings.DEFAULT_FROM_EMAIL,
+                ['fatmahussein355@gmail.com'],
+                fail_silently=False,
+            )
+            messages.success(request, 'Your message has been sent successfully!')
+        except Exception as e:
+            messages.error(request, f'There was an error sending your message: {str(e)}')
+
+        return redirect('contact')
+
+    # For GET requests
+    return render(request, "contact.html", {
+        "contact": Contact.objects.all(),
+        "footer": Footer.objects.all()
+    })
 
 
 # Exhibition Booking System

@@ -4,42 +4,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <title>Login - Usanii Mashariki</title>
+    <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900" rel="stylesheet">
     <style>
         body {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
         }
         .form-container {
-            width: 350px;
-            padding: 20px;
-            background: white;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            background: #ffffff;
+            box-shadow: 0 5px 15px rgba(94, 47, 78, 0.1);
             border-radius: 10px;
             text-align: center;
         }
+        h2 {
+            font-size: 28px;
+            color: #5e2f4e;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
         input {
             width: 100%;
-            padding: 8px;
-            margin: 8px 0;
+            padding: 12px 15px;
+            margin: 10px 0;
             border: 1px solid #ddd;
-            border-radius: 5px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        input:focus {
+            border-color: #5e2f4e;
+            outline: none;
+            background-color: #fff;
+            box-shadow: 0 0 0 2px rgba(94, 47, 78, 0.2);
         }
         button {
             width: 100%;
-            padding: 10px;
-            background-color: #5c67f2;
+            padding: 12px;
+            background-color: #5e2f4e;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
             cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 15px;
         }
         button:hover {
-            background-color: #4a54e1;
+            background-color: #4a2540;
+        }
+        p {
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+        a {
+            color: #5e2f4e;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        a:hover {
+            text-decoration: underline;
+            color: #4a2540;
+        }
+        /* Error messages */
+        .errorlist {
+            color: #dc3545;
+            text-align: left;
+            margin: 0 0 15px 0;
+            padding: 0;
+            list-style: none;
+            font-size: 13px;
+        }
+        .form-container ul.errorlist {
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -48,7 +99,22 @@
         <h2>Login</h2>
         <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
+
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    Please correct the errors below.
+                </div>
+            {% endif %}
+
+            {{ form.non_field_errors }}
+
+            {% for field in form %}
+                <div class="form-group">
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+
             <button type="submit">Login</button>
         </form>
         <p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>

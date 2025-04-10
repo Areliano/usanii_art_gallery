@@ -6,6 +6,7 @@ from .views import register, user_login, user_logout, activate
 from .views import CustomPasswordResetView, CustomPasswordResetDoneView, CustomPasswordResetCompleteView, \
     CustomPasswordResetConfirmView
 from django.contrib.auth import views as auth_views
+from .views import register, registration_success
 
 
 # Redirect to login page when accessing the home page
@@ -34,6 +35,7 @@ urlpatterns = [
     path('login/', user_login, name='login'),
     path('logout/', user_logout, name='logout'),
     path('activate/<uidb64>/<token>/', activate, name='activate'),
+    path('registration-success/', registration_success, name='registration_success'),
 
     # Password Reset URLs
     path('password-reset/', CustomPasswordResetView.as_view(), name='password_reset'),
@@ -45,12 +47,5 @@ urlpatterns = [
     # Contact Form
     path('send-inquiry/', send_inquiry_email, name='send-inquiry'),
 
-    # Removed old reservation/customer URLs:
-    # - reservation/
-    # - booked/
-    # - delete/<id>/
-    # - insertdata/
-    # - edit/<int:id>/
-    # - approve_customer/
-    # - disapprove_customer/
+
 ]

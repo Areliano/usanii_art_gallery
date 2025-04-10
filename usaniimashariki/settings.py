@@ -107,12 +107,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# Change this to your preferred African timezone
+TIME_ZONE = 'Africa/Nairobi'  # Example for Kenya
 
 USE_I18N = True
 
+# Make sure this is True to use the timezone you specified
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
@@ -133,8 +134,12 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'fatmahussein355@gmail.com'  # Your Gmail address
-EMAIL_HOST_PASSWORD = 'rhvnjhxqtfpbxgbw'       # App Password from Google (NOT your Gmail login password)
+EMAIL_HOST_PASSWORD = 'rhvnjhxqtfpbxgbw'       # App Password from Google
 DEFAULT_FROM_EMAIL = 'Usanii Art Gallery <fatmahussein355@gmail.com>'  # Sender name + email
+SERVER_EMAIL = 'fatmahussein355@gmail.com'    # For error notifications
+
+# Required for get_current_site
+SITE_ID = 1
 
 # Redirects after login/logout
 LOGIN_REDIRECT_URL = 'home'

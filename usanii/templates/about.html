@@ -4,41 +4,42 @@
 
 {% block body %}
 
-    <section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/art7.jpg' %}'); height: 100vh; background-size: cover;" data-stellar-background-ratio="1.0">
-      <div class="overlay"></div>
-      <div class="container">
-        <div class="row no-gutters slider-text align-items-center justify-content-center">
-          <div class="col-md-9 ftco-animate text-center" style="background: #ffc4c4">
-            <h1 class="mb-2 bread">About</h1>
-            <p class="breadcrumbs"><span class="mr-2"><a href="{% url 'home' %}">Home <i class="ion-ios-arrow-forward"></i></a></span> <span>About <i class="ion-ios-arrow-forward"></i></span></p>
-          </div>
-        </div>
+    <section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/art7.jpg' %}'); height: 100vh; background-size: cover;" data-stellar-background-ratio="0.5">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row no-gutters slider-text align-items-center justify-content-center">
+      <div class="col-md-9 ftco-animate text-center" style="background: rgba(255, 196, 196, 0.7); border-radius: 10px; padding: 40px;">
+        <h1 class="mb-2 bread" style="font-family: 'Georgia', serif; color: #5e2f4e;">About</h1>
+        <p class="breadcrumbs" style="color: #5e2f4e;"><span class="mr-2"><a href="{% url 'home' %}" style="color: #5e2f4e;">Home <i class="ion-ios-arrow-forward"></i></a></span> <span>About <i class="ion-ios-arrow-forward"></i></span></p>
       </div>
-    </section>
+    </div>
+  </div>
+</section>
 
 
 {% for about in about %}
-		<section class="ftco-section ftco-wrap-about ftco-no-pb ftco-no-pt" style="background: white">
-			<div class="container-fluid">
-				<div class="row no-gutters">
-					<div class="col-sm-5 img img-2 d-flex align-items-center justify-content-center justify-content-md-end" style="background-image: url({% static 'images/about.jpg' %}); position: relative">
-                        <iframe width="900" height="600" src="https://www.youtube.com/embed/k-0GVe6t2pA?si=NoWEmQ_hgXizvzKK" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-					</div>
-					<div class="col-sm-7 wrap-about py-5 ftco-animate">
-	          <div class="heading-section mt-5 mb-4">
-	          	<div class="pl-lg-5 ml-md-5">
-		          	<span class="subheading mb-2">{{ about.heading }}</span>
-		            <h2 class="mb-4" style="color: #000;">{{ about.welcome }}</h2>
+	<section class="ftco-section ftco-wrap-about ftco-no-pb ftco-no-pt" style="background: #FFFFFF;">
+		<div class="container-fluid">
+			<div class="row no-gutters">
+				<div class="col-sm-5 img img-2 d-flex align-items-center justify-content-center justify-content-md-end" style="background-image: url({% static 'images/about.jpg' %}); position: relative; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);">
+                    <iframe width="900" height="600" src="https://www.youtube.com/embed/k-0GVe6t2pA?si=NoWEmQ_hgXizvzKK" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+				</div>
+				<div class="col-sm-7 wrap-about py-5 ftco-animate">
+		          <div class="heading-section mt-5 mb-4">
+		          	<div class="pl-lg-5 ml-md-5">
+		          		<span class="subheading mb-2" style="color: #FF6F61; font-weight: bold;">{{ about.heading }}</span>
+		            <h2 class="mb-4" style="color: #6B5B95;">{{ about.welcome }}</h2>
 	            </div>
 	          </div>
 	          <div class="pl-lg-5 ml-md-5">
 							<p style="color: #000;">{{ about.description }}</p>
-							<h3 class="mt-5" style="color: #000;">{{ about.special }}</h3>
-                            <p class="class" style="color: #000;">{{ about.cool }}</p>
+							<h3 class="mt-5" style="color: #FF6F61;">{{ about.special }}</h3>
+                            <p class="class" style="color: black;">{{ about.cool }}</p>
 						</div>
 					</div>
 				</div>
 			</div>
 		</section>
 {% endfor %}
+
 {% endblock %}
