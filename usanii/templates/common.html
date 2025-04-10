@@ -8,193 +8,160 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Usanii Mashariki</title>
-     <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Lovers+Quarrel" rel="stylesheet">
 
     <link rel="stylesheet" href="{% static 'css/open-iconic-bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/animate.css' %}">
-
     <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/owl.theme.default.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
-
     <link rel="stylesheet" href="{% static 'css/aos.css' %}">
-
     <link rel="stylesheet" href="{% static 'css/ionicons.min.css' %}">
-
     <link rel="stylesheet" href="{% static 'css/bootstrap-datepicker.css' %}">
     <link rel="stylesheet" href="{% static 'css/jquery.timepicker.css' %}">
-
-
     <link rel="stylesheet" href="{% static 'css/flaticon.css' %}">
     <link rel="stylesheet" href="{% static 'css/icomoon.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
 
-	  <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
-	    <div class="container" >
-	      <a class="navbar-brand" href="{% url 'home' %}">Usanii Mashariki Art Gallery</a>
-	      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
-	        <span class="oi oi-menu"></span> Menu
-	      </button>
+<nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'home' %}">Usanii Mashariki Art Gallery</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="oi oi-menu"></span> Menu
+        </button>
 
-	      <div class="collapse navbar-collapse" id="ftco-nav">
-	        <ul class="navbar-nav ml-auto">
-	        	<li class="nav-item {% if nav == 'index' %} active {% endif %}">
+        <div class="collapse navbar-collapse" id="ftco-nav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item {% if nav == 'index' %} active {% endif %}">
                     <a href="{% url 'home' %}" class="nav-link">Home</a>
                 </li>
-
-	        	<li class="nav-item {% if nav == 'about' %} active {% endif %}">
+                <li class="nav-item {% if nav == 'about' %} active {% endif %}">
                     <a href="{% url 'about' %}" class="nav-link">About</a>
                 </li>
                 <li class="nav-item {% if nav == 'blog' %} active {% endif %}">
                     <a href="{% url 'artists' %}" class="nav-link">Artists</a>
                 </li>
-	        	<li class="nav-item {% if nav == 'menu' %} active {% endif %}">
+                <li class="nav-item {% if nav == 'menu' %} active {% endif %}">
                     <a href="{% url 'artworks' %}" class="nav-link">Artworks</a>
                 </li>
-                <li class="nav-item {% if nav == 'reservation' %} active {% endif %}">
-                    <a href="{% url 'reservation' %}" class="nav-link">Reservation</a>
-                </li>
-	        	<li class="nav-item {% if nav == 'exhibitions' %} active {% endif %}">
+                <li class="nav-item {% if nav == 'exhibitions' %} active {% endif %}">
                     <a href="{% url 'exhibitions' %}" class="nav-link">Exhibitions</a>
                 </li>
-	          <li class="nav-item {% if nav == 'contact' %} active {% endif %}">
-                  <a href="{% url 'contact' %}" class="nav-link">Contact</a>
-              </li>
-              <li class="nav-item {% if nav == 'booked' %} active {% endif %}">
-                    <a href="{% url 'booked' %}" class="nav-link">Booked Exhibitions</a>
-              </li>
+                <li class="nav-item {% if nav == 'bookings' %} active {% endif %}">
+                    <a href="{% url 'booking_list' %}" class="nav-link">Bookings</a>
+                </li>
+                <li class="nav-item {% if nav == 'contact' %} active {% endif %}">
+                    <a href="{% url 'contact' %}" class="nav-link">Contact</a>
+                </li>
 
-              <!--  <li class="nav-item">
-    <a class="nav-link" href="{% url 'register' %}">Register</a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'login' %}">Login</a>
-</li> -->
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- END nav -->
 
-{% if user.is_authenticated %}
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-    </li>
-{% endif %}
-
-
-
-	        </ul>
-
-	      </div>
-	    </div>
-	  </nav>
-    <!-- END nav -->
 {% block body %}
 
 {% endblock %}
 
-
 {% for footer in footer %}
-
     <footer class="ftco-footer ftco-bg-dark ftco-section">
-      <div class="container">
-        <div class="row mb-5">
-          <div class="col-md-6 col-lg-3">
-            <div class="ftco-footer-widget mb-4">
-              <h2 class="ftco-heading-2">{{ footer.heading }}</h2>
-              <p>{{ footer.about }}</p>
-              <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-3">
-                       <li class="ftco-animate"><a href="{{ footer.twitter }}" target="_blank"><span class="icon-twitter"></span></a></li>
-		                <li class="ftco-animate"><a href="{{ footer.facebook }}" target="_blank"><span class="icon-facebook"></span></a></li>
-		                <li class="ftco-animate"><a href="{{ footer.instagram }}" target="_blank"><span class="icon-instagram"></span></a></li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-md-6 col-lg-3">
-            <div class="ftco-footer-widget mb-4">
-              <h2 class="ftco-heading-2">{{ footer.open_days }}</h2>
-              <ul class="list-unstyled open-hours">
-                <li class="d-flex"><span>Monday</span><span>07:00hrs - 21:00hrs</span></li>
-                <li class="d-flex"><span>Tuesday</span><span>07:00hrs - 21:00hrs</span></li>
-                <li class="d-flex"><span>Wednesday</span><span>07:00hrs - 21:00hrs</span></li>
-                <li class="d-flex"><span>Thursday</span><span>07:00hrs - 21:00hrs</span></li>
-                <li class="d-flex"><span>Friday</span><span>07:00hrs - 21:00hrs</span></li>
-                <li class="d-flex"><span>Saturday</span><span>07:00hrs - 21:00hrs</span></li>
-                <li class="d-flex"><span>Sunday</span><span>07:00hrs - 16:00hrs</span></li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-md-6 col-lg-3">
-            <div class="ftco-footer-widget mb-4">
-            	<h2 class="ftco-heading-2">Newsletter</h2>
-            	<p>{{ footer.newsletter }}</p>
-              <form action="#" class="subscribe-form">
-                <div class="form-group">
-                  <input type="text" class="form-control mb-2 text-center" placeholder="Enter email address">
-                  <input type="submit" value="Subscribe" class="form-control submit px-3">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-md-6 col-lg-3">
+                    <div class="ftco-footer-widget mb-4">
+                        <h2 class="ftco-heading-2">{{ footer.heading }}</h2>
+                        <p>{{ footer.about }}</p>
+                        <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-3">
+                            <li class="ftco-animate"><a href="{{ footer.twitter }}" target="_blank"><span class="icon-twitter"></span></a></li>
+                            <li class="ftco-animate"><a href="{{ footer.facebook }}" target="_blank"><span class="icon-facebook"></span></a></li>
+                            <li class="ftco-animate"><a href="{{ footer.instagram }}" target="_blank"><span class="icon-instagram"></span></a></li>
+                        </ul>
+                    </div>
                 </div>
-              </form>
+                <div class="col-md-6 col-lg-3">
+                    <div class="ftco-footer-widget mb-4">
+                        <h2 class="ftco-heading-2">{{ footer.open_days }}</h2>
+                        <ul class="list-unstyled open-hours">
+                            <li class="d-flex"><span>Monday</span><span>07:00hrs - 21:00hrs</span></li>
+                            <li class="d-flex"><span>Tuesday</span><span>07:00hrs - 21:00hrs</span></li>
+                            <li class="d-flex"><span>Wednesday</span><span>07:00hrs - 21:00hrs</span></li>
+                            <li class="d-flex"><span>Thursday</span><span>07:00hrs - 21:00hrs</span></li>
+                            <li class="d-flex"><span>Friday</span><span>07:00hrs - 21:00hrs</span></li>
+                            <li class="d-flex"><span>Saturday</span><span>07:00hrs - 21:00hrs</span></li>
+                            <li class="d-flex"><span>Sunday</span><span>07:00hrs - 16:00hrs</span></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="ftco-footer-widget mb-4">
+                        <h2 class="ftco-heading-2">Newsletter</h2>
+                        <p>{{ footer.newsletter }}</p>
+                        <form action="#" class="subscribe-form">
+                            <div class="form-group">
+                                <input type="text" class="form-control mb-2 text-center" placeholder="Enter email address">
+                                <input type="submit" value="Subscribe" class="form-control submit px-3">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="ftco-footer-widget mb-4">
+                        <h2 class="ftco-heading-2">Instagram</h2>
+                        <div class="thumb d-sm-flex">
+                            <a href="#" class="thumb-menu img" style="background-image: url('{{ footer.image1.url }}')"></a>
+                            <a href="#" class="thumb-menu img" style="background-image: url('{{ footer.image2.url }}');"></a>
+                            <a href="#" class="thumb-menu img" style="background-image: url('{{ footer.image3.url }}');"></a>
+                        </div>
+                        <div class="thumb d-flex">
+                            <a href="#" class="thumb-menu img" style="background-image: url('{{ footer.image4.url }}');"></a>
+                            <a href="#" class="thumb-menu img" style="background-image: url('{{ footer.image5.url }}');"></a>
+                            <a href="#" class="thumb-menu img" style="background-image: url('{{ footer.image6.url }}');"></a>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class="col-md-6 col-lg-3">
-             <div class="ftco-footer-widget mb-4">
-              <h2 class="ftco-heading-2">Instagram</h2>
-              <div class="thumb d-sm-flex">
-	            	<a href="#" class="thumb-menu img" style="background-image: url('{{ footer.image1.url }}')">
-	            	</a>
-	            	<a href="#" class="thumb-menu img" style="background-image: url(' {{ footer.image2.url }}');">
-	            	</a>
-	            	<a href="#" class="thumb-menu img" style="background-image: url(' {{ footer.image3.url }}');">
-	            	</a>
-	            </div>
-	            <div class="thumb d-flex">
-	            	<a href="#" class="thumb-menu img" style="background-image: url(' {{ footer.image4.url }}');">
-	            	</a>
-	            	<a href="#" class="thumb-menu img" style="background-image: url(' {{ footer.image5.url }}');">
-	            	</a>
-	            	<a href="#" class="thumb-menu img" style="background-image: url(' {{ footer.image6.url }}');">
-	            	</a>
-	            </div>
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <p>
+                        <br><br>All rights reserved | Usanii Mashariki Art Gallery | Waterfront Mall | Karen | call at: +254792535807 | Email: info@usaniimashariki.com
+                        <br><br><br>
+                        Copyright &copy;<script>document.write(new Date().getFullYear());</script>
+                    </p>
+                </div>
             </div>
-          </div>
         </div>
-        <div class="row">
-          <div class="col-md-12 text-center">
-
-            <p>
-
-                <br> <br> All rights reserved | Usanii Mashariki Art Gallery | Waterfront Mall | Karen | call at: +254792535807 | Email: info@usaniimashariki.com
-                <br> <br> <br>
-            Copyright &copy;<script>document.write(new Date().getFullYear());</script> </p>
-          </div>
-        </div>
-      </div>
     </footer>
-
 {% endfor %}
 
+<!-- loader -->
+<div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00"/></svg></div>
 
-  <!-- loader -->
-  <div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00"/></svg></div>
-
-
-  <script src="{% static 'js/jquery.min.js' %}"></script>
-  <script src="{% static 'js/jquery-migrate-3.0.1.min.js' %}"></script>
-  <script src="{% static 'js/popper.min.js' %}"></script>
-  <script src="{% static 'js/bootstrap.min.js' %}"></script>
-  <script src="{% static 'js/jquery.easing.1.3.js' %}"></script>
-  <script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
-  <script src="{% static 'js/jquery.stellar.min.js' %}"></script>
-  <script src="{% static 'js/owl.carousel.min.js' %}"></script>
-  <script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>
-  <script src="{% static 'js/aos.js' %}"></script>
-  <script src="{% static 'js/jquery.animateNumber.min.js' %}"></script>
-  <script src="{% static 'js/bootstrap-datepicker.js' %}"></script>
-  <script src="{% static 'js/jquery.timepicker.min.js' %}"></script>
-  <script src="{% static 'js/scrollax.min.js' %}"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&sensor=false"></script>
-  <script src="{% static 'js/google-map.js' %}"></script>
-  <script src="{% static 'js/main.js' %}"></script>
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/jquery-migrate-3.0.1.min.js' %}"></script>
+<script src="{% static 'js/popper.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/jquery.easing.1.3.js' %}"></script>
+<script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
+<script src="{% static 'js/jquery.stellar.min.js' %}"></script>
+<script src="{% static 'js/owl.carousel.min.js' %}"></script>
+<script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>
+<script src="{% static 'js/aos.js' %}"></script>
+<script src="{% static 'js/jquery.animateNumber.min.js' %}"></script>
+<script src="{% static 'js/bootstrap-datepicker.js' %}"></script>
+<script src="{% static 'js/jquery.timepicker.min.js' %}"></script>
+<script src="{% static 'js/scrollax.min.js' %}"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&sensor=false"></script>
+<script src="{% static 'js/google-map.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
 
 </body>
 </html>
-

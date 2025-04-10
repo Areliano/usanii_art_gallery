@@ -127,13 +127,15 @@ MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Email Configuration for Sending via Gmail
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'fatmahussein355@gmail.com'  # Replace with your Gmail
-EMAIL_HOST_PASSWORD = 'rhvnjhxqtfpbxgbw'  # Use App Password for security
+EMAIL_HOST_USER = 'fatmahussein355@gmail.com'  # Your Gmail address
+EMAIL_HOST_PASSWORD = 'rhvnjhxqtfpbxgbw'       # App Password from Google (NOT your Gmail login password)
+DEFAULT_FROM_EMAIL = 'Usanii Art Gallery <fatmahussein355@gmail.com>'  # Sender name + email
 
-
-LOGIN_REDIRECT_URL = 'home'  # Redirect to home after login
-LOGOUT_REDIRECT_URL = 'login'  # Redirect to login after logout
+# Redirects after login/logout
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'login'

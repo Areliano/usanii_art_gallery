@@ -1,33 +1,39 @@
 {% extends 'common.html' %}
-
 {% load static %}
 
 {% block body %}
-    <section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/art8.jpg' %}'); height: 100vh; background-size: cover;" data-stellar-background-ratio="0.5">
-      <div class="overlay"></div>
-      <div class="container">
-        <div class="row no-gutters slider-text align-items-center justify-content-center">
-          <div class="col-md-9 ftco-animate text-center" style="background: #ffc4c4">
-            <h1 class="mb-2 bread">Exhibitions</h1>
-            <p class="breadcrumbs"><span class="mr-2"><a href="{% url 'home' %}">Home <i class="ion-ios-arrow-forward"></i></a></span> <span>Our Exhibitions <i class="ion-ios-arrow-forward"></i></span></p>
-          </div>
-        </div>
+<section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/art8.jpg' %}'); height: 100vh; background-size: cover;" data-stellar-background-ratio="0.5">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row no-gutters slider-text align-items-center justify-content-center">
+      <div class="col-md-9 ftco-animate text-center" style="background: #ffc4c4">
+        <h1 class="mb-2 bread">Exhibitions</h1>
+        <p class="breadcrumbs"><span class="mr-2"><a href="{% url 'home' %}">Home <i class="ion-ios-arrow-forward"></i></a></span> <span>Our Exhibitions <i class="ion-ios-arrow-forward"></i></span></p>
       </div>
-    </section>
+    </div>
+  </div>
+</section>
 
 <div class="container" style="background: white">
     <h2 class="text-center my-4">Explore Our Art Exhibitions</h2>
-    <div class="row justify-content-center" > <!-- Center the cards -->
-        {% for exhibitions in exhibitions %}
-        <div class="col-md-8 mb-4"> <!-- Reduced card width -->
+    <div class="row justify-content-center">
+        {% for exhibition in exhibitions %}
+        <div class="col-md-8 mb-4">
             <div class="card">
-                <img src="{{ exhibitions.image.url }}" class="card-img-top" alt="{{ exhibitions.title }}"
+                <img src="{{ exhibition.image.url }}" class="card-img-top" alt="{{ exhibition.title }}"
                      style="height: 500px; width: 100%; object-fit: contain; padding: 10px;">
                 <div class="card-body text-center">
-                    <h2 class="card-title">{{ exhibitions.title }}</h2>
-                    <p class="card-text" style="color: #000;"><strong>Exhibition Date:</strong> {{ exhibitions.date }}</p>
-                    <p class="card-text" style="color: #000;"><strong>Description:</strong> {{ exhibitions.description }}</p>
-                    <a href="{% url 'reservation' %}" class="btn btn-primary btn-lg">Book</a>
+                    <h2 class="card-title">{{ exhibition.title }}</h2>
+                    <p class="card-text" style="color: #000;"><strong>Exhibition Date:</strong> {{ exhibition.date }}</p>
+                    <p class="card-text" style="color: #000;"><strong>Time:</strong> {{ exhibition.start_time }} - {{ exhibition.end_time }}</p>
+                    <p class="card-text" style="color: #000;"><strong>Available Spots:</strong> {{ exhibition.available_spots }}/{{ exhibition.max_capacity }}</p>
+                    <p class="card-text" style="color: #000;"><strong>Description:</strong> {{ exhibition.description }}</p>
+
+                    <button class="btn btn-primary btn-lg book-btn"
+                            data-exhibition-id="{{ exhibition.id }}"
+                            {% if exhibition.is_full %}disabled{% endif %}>
+                        {% if exhibition.is_full %}Fully Booked{% else %}Book Now{% endif %}
+                    </button>
                 </div>
             </div>
         </div>
@@ -35,6 +41,182 @@
     </div>
 </div>
 
+<!-- Booking Modal -->
+<div class="modal fade" id="bookingModal" tabindex="-1" role="dialog" aria-labelledby="bookingModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bookingModalLabel">Book Exhibition</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="bookingForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="exhibitionId" name="exhibition_id">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="confirmBooking">Confirm Booking</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">Booking Successful</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Your booking has been confirmed! A confirmation email has been sent to you.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="errorModalLabel">Booking Error</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="errorModalBody">
+                <p>An error occurred while processing your booking.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Make sure jQuery and Bootstrap JS are loaded -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Handle book button click
+    $(document).on('click', '.book-btn', function(e) {
+        e.preventDefault();
+
+        if ($(this).attr('disabled')) return;
+
+        var exhibitionId = $(this).data('exhibition-id');
+        $('#exhibitionId').val(exhibitionId);
+        $('#bookingModal').modal('show');
+    });
+
+    // Confirm Booking Button Click
+    $('#confirmBooking').click(function(e) {
+        e.preventDefault();
+
+        // Gather form values
+        var name = $('#name').val().trim();
+        var email = $('#email').val().trim();
+        var phone = $('#phone').val().trim();
+
+        // Regex patterns
+        var nameRegex = /^[A-Za-z\s]+$/;
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        var phoneRegex = /^\d{10}$/;
+
+        // Validation
+        if (!name || !email || !phone) {
+            showError('All fields are required.');
+            return;
+        }
+
+        if (!nameRegex.test(name)) {
+            showError('Name must contain only letters and spaces (no numbers or symbols).');
+            return;
+        }
+
+        if (!emailRegex.test(email)) {
+            showError('Please enter a valid email address.');
+            return;
+        }
+
+        if (!phoneRegex.test(phone)) {
+            showError('Phone number must be exactly 10 digits.');
+            return;
+        }
+
+        // Prepare form data
+        var formData = new FormData($('#bookingForm')[0]);
+
+        // Disable button and show loading
+        $(this).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...');
+        $(this).prop('disabled', true);
+
+        // Send AJAX request
+        $.ajax({
+            type: 'POST',
+            url: '{% url "book_exhibition" %}',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                $('#confirmBooking').html('Confirm Booking').prop('disabled', false);
+                if (response.success) {
+                    $('#bookingModal').modal('hide');
+                    $('#successModal').modal('show');
+                    $('#bookingForm')[0].reset();
+                } else {
+                    showError(response.message || 'An error occurred during booking.');
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#confirmBooking').html('Confirm Booking').prop('disabled', false);
+                try {
+                    var response = JSON.parse(xhr.responseText);
+                    showError(response.message || 'An error occurred. Please try again.');
+                } catch (e) {
+                    showError('An unexpected error occurred. Please try again.');
+                }
+            }
+        });
+    });
+
+    // Reload page after success modal is closed
+    $('#successModal').on('hidden.bs.modal', function () {
+        location.reload();
+    });
+
+    // Function to show error message in modal
+    function showError(message) {
+        $('#errorModalBody').html(message);
+        $('#errorModal').modal('show');
+    }
+});
+</script>
 
 
 {% endblock %}

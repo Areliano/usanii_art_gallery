@@ -1,8 +1,7 @@
 from django.db import models
-
-# Create your models here.
-
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
+
 
 class Aboutpage(models.Model):
     heading = models.CharField(max_length=500, default='heading')
@@ -14,15 +13,16 @@ class Aboutpage(models.Model):
     def __str__(self):
         return self.heading
 
+
 class Artists(models.Model):
     name = models.CharField(max_length=500, default='text1')
     date = models.CharField(max_length=500, default='text2')
     text1 = models.TextField(max_length=500, default='text3')
     image = models.ImageField(upload_to='artists', default='artists.jpg')
 
-
     def __str__(self):
         return self.name
+
 
 class Homepage(models.Model):
     heading = models.CharField(max_length=500, default='heading')
@@ -31,6 +31,7 @@ class Homepage(models.Model):
 
     def __str__(self):
         return self.heading
+
 
 class Artworks(models.Model):
     title = models.CharField(max_length=255, default='artists')
@@ -43,14 +44,51 @@ class Artworks(models.Model):
         return self.name
 
 
-class Exhibitions(models.Model):
+from django.db import models
+
+class Exhibition(models.Model):
     title = models.CharField(max_length=255)
     image = models.ImageField(upload_to='exhibitions/')
     date = models.CharField(max_length=200, default='Saturday')
     description = models.TextField(max_length=1000, default='This is an exhibition')
+    start_time = models.TimeField(
+        help_text="Format: HH:MM (24-hour format), e.g. 18:00 for 6 PM"
+    )
+    end_time = models.TimeField(
+        help_text="Format: HH:MM (24-hour format), e.g. 21:00 for 9 PM"
+    )
+    max_capacity = models.PositiveIntegerField(default=50)
+    current_attendees = models.PositiveIntegerField(default=0)
+
+    def is_full(self):
+        return self.current_attendees >= self.max_capacity
+
+    def available_spots(self):
+        return self.max_capacity - self.current_attendees
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        verbose_name = "Exhibition"
+        verbose_name_plural = "Exhibitions"
+
+
+
+class Booking(models.Model):
+    exhibition = models.ForeignKey(Exhibition, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    email = models.EmailField()
+    phone = models.CharField(max_length=15)
+    booking_date = models.DateTimeField(auto_now_add=True)
+    is_confirmed = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ('email', 'exhibition')  # Prevent duplicate bookings
+
+    def __str__(self):
+        return f"{self.name} - {self.exhibition.title}"
+
 
 class Contact(models.Model):
     name = models.CharField(max_length=500, default='text1')
@@ -61,6 +99,7 @@ class Contact(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Footer(models.Model):
     heading = models.CharField(max_length=500, default='text1')
@@ -79,31 +118,6 @@ class Footer(models.Model):
 
     def __str__(self):
         return self.heading
-
-
-
-class Customer(models.Model):
-    name = models.CharField(max_length=255)
-    email = models.EmailField()
-    phone = models.CharField(max_length=15)
-    date = models.DateField(null=True, blank=True)  # ✅ Ensure null & blank are allowed
-    time = models.TimeField(null=True, blank=True)
-    event = models.CharField(max_length=255, default="Unknown Event")
-    is_approved = models.BooleanField(default=False)  # ✅ Ensure this exists
-
-    def __str__(self):
-        return self.name
-
-
-class Reservation(models.Model):
-    name = models.CharField(max_length=255)
-    email = models.EmailField()
-    phone = models.CharField(max_length=15)
-    event = models.CharField(max_length=255)
-    is_approved = models.BooleanField(default=False)  # Status field
-
-    def __str__(self):
-        return self.name
 
 
 class Moreartist(models.Model):
