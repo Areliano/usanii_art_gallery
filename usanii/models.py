@@ -23,6 +23,9 @@ class Artists(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def artwork_count(self):
+        return self.artworks.count()  # This will use the reverse relation
 
 class Homepage(models.Model):
     heading = models.CharField(max_length=500, default='heading')
@@ -34,6 +37,13 @@ class Homepage(models.Model):
 
 
 class Artworks(models.Model):
+    artist = models.ForeignKey(
+        Artists,
+        on_delete=models.CASCADE,
+        related_name='artworks',  # This enables artist.artworks.all()
+        null=True,  # Optional: allows existing artworks to remain if artist is deleted
+        blank=True  # Optional: allows creating artworks without immediate artist assignment
+    )
     title = models.CharField(max_length=255, default='artists')
     name = models.CharField(max_length=500, default='text1')
     image = models.ImageField(upload_to='artistworks', default='artistsworks.jpg')
@@ -42,9 +52,6 @@ class Artworks(models.Model):
 
     def __str__(self):
         return self.name
-
-
-from django.db import models
 
 class Exhibition(models.Model):
     title = models.CharField(max_length=255)
@@ -59,6 +66,7 @@ class Exhibition(models.Model):
     )
     max_capacity = models.PositiveIntegerField(default=50)
     current_attendees = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(default=timezone.now)  # Added for better reporting
 
     def is_full(self):
         return self.current_attendees >= self.max_capacity
@@ -66,29 +74,52 @@ class Exhibition(models.Model):
     def available_spots(self):
         return self.max_capacity - self.current_attendees
 
+    def booking_count(self):
+        """Returns total number of bookings for this exhibition"""
+        return self.booking_set.count()
+
+    def attendance_percentage(self):
+        """Returns percentage of seats filled"""
+        if self.max_capacity == 0:
+            return 0
+        return round((self.current_attendees / self.max_capacity) * 100, 2)
+
     def __str__(self):
         return self.title
 
     class Meta:
         verbose_name = "Exhibition"
         verbose_name_plural = "Exhibitions"
-
-
+        ordering = ['-created_at']  # Newest exhibitions first
 
 class Booking(models.Model):
-    exhibition = models.ForeignKey(Exhibition, on_delete=models.CASCADE)
+    exhibition = models.ForeignKey(
+        Exhibition,
+        on_delete=models.CASCADE,
+        related_name='bookings'  # Added for easier querying
+    )
     name = models.CharField(max_length=255)
     email = models.EmailField()
     phone = models.CharField(max_length=15)
     booking_date = models.DateTimeField(auto_now_add=True)
     is_confirmed = models.BooleanField(default=True)
+    attended = models.BooleanField(default=False)  # Track if they actually attended
 
     class Meta:
         unique_together = ('email', 'exhibition')  # Prevent duplicate bookings
+        ordering = ['-booking_date']  # Newest bookings first
+        verbose_name = "Booking"
+        verbose_name_plural = "Bookings"
 
     def __str__(self):
-        return f"{self.name} - {self.exhibition.title}"
+        return f"{self.name} - {self.exhibition.title} (Confirmed: {self.is_confirmed})"
 
+    def save(self, *args, **kwargs):
+        """Update exhibition attendees when booking is confirmed"""
+        if self.is_confirmed and not self.attended:
+            self.exhibition.current_attendees += 1
+            self.exhibition.save()
+        super().save(*args, **kwargs)
 
 class Contact(models.Model):
     name = models.CharField(max_length=500, default='text1')

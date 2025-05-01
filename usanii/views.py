@@ -19,7 +19,7 @@ from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, 
 from django.views.decorators.http import require_POST
 import json
 
-
+from django.contrib.auth.decorators import user_passes_test
 from django.template.loader import render_to_string
 
 from django.shortcuts import render, redirect
@@ -344,3 +344,121 @@ def moreartist(request):
         "moreartist": Moreartist.objects.all(),
         "footer": Footer.objects.all()
     })
+
+
+from datetime import datetime
+from django.db.models import Count, Q, Case, When, F, ExpressionWrapper, FloatField
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.contrib.auth.decorators import user_passes_test
+from django.views.decorators.http import require_http_methods
+from .models import Artists, Artworks, Exhibition, Booking, Footer
+
+@user_passes_test(lambda u: u.is_superuser)
+def generate_reports(request):
+    # Date range handling
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    # Convert dates if provided
+    if start_date:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+    if end_date:
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+
+    # Base querysets
+    artists = Artists.objects.all()
+    artworks = Artworks.objects.all()
+    exhibitions = Exhibition.objects.all()
+    bookings = Booking.objects.all()
+
+    # Apply date filters if provided
+    if start_date and end_date:
+        exhibitions = exhibitions.filter(
+            Q(date__range=[start_date, end_date]) |
+            Q(created_at__date__range=[start_date, end_date])
+        )
+        bookings = bookings.filter(booking_date__date__range=[start_date, end_date])
+
+    # Generate report data
+    report_data = {
+        'total_artists': artists.count(),
+        'total_artworks': artworks.count(),
+        'recent_exhibitions': exhibitions.count(),
+        'total_bookings': bookings.count(),
+        'cancelled_bookings': bookings.filter(is_confirmed=False).count(),
+        'confirmed_bookings': bookings.filter(is_confirmed=True).count(),
+        'start_date': start_date.strftime('%Y-%m-%d') if start_date else '',
+        'end_date': end_date.strftime('%Y-%m-%d') if end_date else '',
+    }
+
+    # For AJAX requests, return JSON for charts
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        chart_data = {
+            'artists_by_artwork': get_artists_by_artwork_data(),
+            'bookings_trend': get_bookings_trend_data(start_date, end_date),
+            'exhibition_attendance': get_exhibition_attendance_data(),
+        }
+        return JsonResponse({'report_data': report_data, 'chart_data': chart_data})
+
+    return render(request, 'reports/report.html', {
+        'report_data': report_data,
+        'footer': Footer.objects.all()
+    })
+
+def get_artists_by_artwork_data():
+    try:
+        artists = Artists.objects.annotate(
+            num_artworks=Count('artworks')  # Changed from artwork_count to num_artworks
+        ).filter(
+            num_artworks__gt=0
+        ).order_by('-num_artworks')
+
+        return {
+            'labels': [artist.name for artist in artists],
+            'data': [artist.num_artworks for artist in artists],  # Updated field name
+        }
+    except Exception as e:
+        print(f"Error in get_artists_by_artwork_data: {str(e)}")
+        return {
+            'labels': [],
+            'data': [],
+        }
+
+def get_bookings_trend_data(start_date=None, end_date=None):
+    from django.db.models.functions import TruncDay
+
+    bookings = Booking.objects.all()
+    if start_date and end_date:
+        bookings = bookings.filter(booking_date__date__range=[start_date, end_date])
+
+    daily_bookings = bookings.annotate(day=TruncDay('booking_date')) \
+        .values('day') \
+        .annotate(count=Count('id')) \
+        .order_by('day')
+
+    return {
+        'labels': [entry['day'].strftime('%Y-%m-%d') for entry in daily_bookings],
+        'data': [entry['count'] for entry in daily_bookings],
+    }
+
+def get_exhibition_attendance_data():
+    exhibitions = Exhibition.objects.annotate(
+        bookings_count=Count('bookings'),
+        attendance_percentage=Case(
+            When(max_capacity=0, then=0),
+            default=ExpressionWrapper(
+                F('current_attendees') * 100.0 / F('max_capacity'),
+                output_field=FloatField()
+            ),
+            output_field=FloatField()
+        )
+    ).order_by('-attendance_percentage')
+
+    return {
+        'labels': [exh.title for exh in exhibitions],
+        'data': [float(exh.attendance_percentage) for exh in exhibitions],
+        'max_capacity': [exh.max_capacity for exh in exhibitions],
+        'current_attendees': [exh.current_attendees for exh in exhibitions],
+        'bookings_count': [exh.bookings_count for exh in exhibitions],
+    }

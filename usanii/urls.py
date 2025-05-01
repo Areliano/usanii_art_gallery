@@ -2,7 +2,7 @@ from django.urls import path
 from django.shortcuts import redirect
 from . import views
 from .views import send_inquiry_email
-from .views import register, user_login, user_logout, activate
+from .views import register, user_login, user_logout, activate, generate_reports
 from .views import CustomPasswordResetView, CustomPasswordResetDoneView, CustomPasswordResetCompleteView, \
     CustomPasswordResetConfirmView
 from django.contrib.auth import views as auth_views
@@ -48,4 +48,10 @@ urlpatterns = [
     path('send-inquiry/', send_inquiry_email, name='send-inquiry'),
 
 
+    # Report URLs ...
+    path('admin/reports/', generate_reports, name='generate_reports'),
+    path('admin/reports/data/', generate_reports, name='report_data'),  # For AJAX requests
 ]
+
+
+

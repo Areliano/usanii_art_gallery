@@ -20,10 +20,14 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from usanii.views import generate_reports
 
 urlpatterns = [
+    path('admin/reports/', generate_reports, name='generate_reports'),  # Add this line
+    path('admin/reports/data/', generate_reports, name='report_data'),
     path('admin/', admin.site.urls),
     path('', include('usanii.urls')),  # Ensure 'usanii' is correctly registered in INSTALLED_APPS
+
 ]
 
 # Serve media files during development

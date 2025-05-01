@@ -1,0 +1,444 @@
+<!-- templates/reports/report.html -->
+{% extends 'common.html' %}
+{% load static %}
+
+{% block body %}
+<section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/art.png' %}'); height: 30vh; background-size: cover;">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row no-gutters slider-text align-items-center justify-content-center">
+      <div class="col-md-9 ftco-animate text-center" style="background: rgba(255, 196, 196, 0.7); border-radius: 10px; padding: 20px;">
+        <h1 class="mb-2 bread" style="font-family: 'Georgia', serif; color: #5e2f4e;">Gallery Analytics Dashboard</h1>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ftco-section" style="background: white; padding-top: 50px;">
+  <div class="container">
+    <!-- Date Range Filter -->
+    <div class="card mb-4 shadow">
+      <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Filter Reports</h4>
+      </div>
+      <div class="card-body">
+        <form id="dateFilterForm" class="form-inline">
+          <div class="form-group mr-3">
+            <label for="startDate" class="mr-2">From:</label>
+            <input type="date" id="startDate" name="start_date" class="form-control"
+                   value="{{ report_data.start_date }}">
+          </div>
+          <div class="form-group mr-3">
+            <label for="endDate" class="mr-2">To:</label>
+            <input type="date" id="endDate" name="end_date" class="form-control"
+                   value="{{ report_data.end_date }}">
+          </div>
+          <button type="submit" class="btn btn-primary">Apply Filter</button>
+          <button type="button" id="resetFilter" class="btn btn-secondary ml-2">Reset</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+      <!-- Artists Card -->
+      <div class="col-md-4 mb-4">
+        <div class="card border-left-info h-100">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-paint-brush fa-3x text-info mr-3"></i>
+              <div>
+                <h5 class="card-title">Total Artists</h5>
+                <h2 class="mb-0">{{ report_data.total_artists }}</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Artworks Card -->
+      <div class="col-md-4 mb-4">
+        <div class="card border-left-success h-100">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-image fa-3x text-success mr-3"></i>
+              <div>
+                <h5 class="card-title">Total Artworks</h5>
+                <h2 class="mb-0">{{ report_data.total_artworks }}</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exhibitions Card -->
+      <div class="col-md-4 mb-4">
+        <div class="card border-left-warning h-100">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-calendar-alt fa-3x text-warning mr-3"></i>
+              <div>
+                <h5 class="card-title">Exhibitions</h5>
+                <h2 class="mb-0">{{ report_data.recent_exhibitions }}</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row mb-4">
+      <!-- Bookings Trend Chart -->
+      <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Bookings Trend</h5>
+          </div>
+          <div class="card-body">
+            <canvas id="bookingsChart" height="250"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Artists by Artwork Chart -->
+      <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Artists by Number of Artworks</h5>
+          </div>
+          <div class="card-body">
+            <canvas id="artistsChart" height="250"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Exhibition Attendance Chart -->
+      <div class="col-md-12 mb-4">
+        <div class="card shadow h-100">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Exhibition Attendance</h5>
+          </div>
+          <div class="card-body">
+            <canvas id="attendanceChart" height="250"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed Statistics -->
+    <div class="card shadow mt-4">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Booking Statistics</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4 text-center">
+            <h3>{{ report_data.total_bookings }}</h3>
+            <p class="text-muted">Total Bookings</p>
+          </div>
+          <div class="col-md-4 text-center">
+            <h3 class="text-success">{{ report_data.confirmed_bookings }}</h3>
+            <p class="text-muted">Confirmed</p>
+          </div>
+          <div class="col-md-4 text-center">
+            <h3 class="text-danger">{{ report_data.cancelled_bookings }}</h3>
+            <p class="text-muted">Cancelled</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Initialize chart variables
+    let bookingsChart = null;
+    let artistsChart = null;
+    let attendanceChart = null;
+
+    // Load initial chart data
+    fetchChartData();
+
+    // Form submission handler
+    document.getElementById('dateFilterForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        fetchChartData();
+    });
+
+    // Reset filter handler
+    document.getElementById('resetFilter').addEventListener('click', function() {
+        document.getElementById('startDate').value = '';
+        document.getElementById('endDate').value = '';
+        fetchChartData();
+    });
+
+    // Function to fetch chart data
+    function fetchChartData() {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+
+        let url = '{% url "report_data" %}';
+        let params = new URLSearchParams();
+        if (startDate) params.append('start_date', startDate);
+        if (endDate) params.append('end_date', endDate);
+
+        fetch(url + '?' + params.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Received data:', data);
+            if (data.chart_data && data.report_data) {
+                updateCharts(data.chart_data);
+                updateStats(data.report_data);
+            } else {
+                console.error('Invalid data format received:', data);
+                alert('Received invalid data format. Check console for details.');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching chart data:', error);
+            alert('Failed to load report data: ' + error.message);
+        });
+    }
+
+    // Function to update charts
+    function updateCharts(chartData) {
+        try {
+            if (chartData.bookings_trend) {
+                updateBookingsChart(chartData.bookings_trend);
+            }
+            if (chartData.artists_by_artwork) {
+                updateArtistsChart(chartData.artists_by_artwork);
+            }
+            if (chartData.exhibition_attendance) {
+                updateAttendanceChart(chartData.exhibition_attendance);
+            }
+        } catch (chartError) {
+            console.error('Error updating charts:', chartError);
+        }
+    }
+
+    // Function to update stats
+    function updateStats(reportData) {
+        try {
+            if (reportData.recent_exhibitions !== undefined) {
+                const exhibitionElements = document.querySelectorAll('.card-title');
+                exhibitionElements.forEach(el => {
+                    if (el.textContent.trim() === 'Exhibitions') {
+                        const valueElement = el.nextElementSibling;
+                        if (valueElement) {
+                            valueElement.textContent = reportData.recent_exhibitions;
+                        }
+                    }
+                });
+            }
+        } catch (statsError) {
+            console.error('Error updating stats:', statsError);
+        }
+    }
+
+    // Bookings Trend Chart
+    function updateBookingsChart(data) {
+        try {
+            const ctx = document.getElementById('bookingsChart');
+            if (!ctx) return;
+
+            if (bookingsChart) {
+                bookingsChart.destroy();
+            }
+
+            bookingsChart = new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: data.labels || [],
+                    datasets: [{
+                        label: 'Bookings per Day',
+                        data: data.data || [],
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                tooltipFormat: 'MMM D, YYYY'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error rendering bookings chart:', error);
+        }
+    }
+
+    // Artists by Artwork Chart
+    function updateArtistsChart(data) {
+        try {
+            const ctx = document.getElementById('artistsChart');
+            if (!ctx) return;
+
+            if (artistsChart) {
+                artistsChart.destroy();
+            }
+
+            // Generate colors for each artist
+            const backgroundColors = (data.labels || []).map((_, i) => {
+                const hue = (i * 360 / Math.max(1, data.labels?.length || 1)) % 360;
+                return `hsla(${hue}, 70%, 50%, 0.7)`;
+            });
+
+            artistsChart = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: data.labels || [],
+                    datasets: [{
+                        label: 'Number of Artworks',
+                        data: data.data || [],
+                        backgroundColor: backgroundColors,
+                        borderColor: backgroundColors.map(c => c.replace('0.7', '1')),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error rendering artists chart:', error);
+        }
+    }
+
+    // Exhibition Attendance Chart
+    function updateAttendanceChart(data) {
+        try {
+            const ctx = document.getElementById('attendanceChart');
+            if (!ctx) return;
+
+            if (attendanceChart) {
+                attendanceChart.destroy();
+            }
+
+            attendanceChart = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: data.labels || [],
+                    datasets: [
+                        {
+                            label: 'Max Capacity',
+                            data: data.max_capacity || [],
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Current Attendees',
+                            data: data.current_attendees || [],
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error rendering attendance chart:', error);
+        }
+    }
+});
+</script>
+
+<style>
+.card {
+    border-radius: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+}
+.border-left-primary { border-left: 4px solid #4e73df; }
+.border-left-success { border-left: 4px solid #1cc88a; }
+.border-left-info { border-left: 4px solid #36b9cc; }
+.border-left-warning { border-left: 4px solid #f6c23e; }
+.border-left-danger { border-left: 4px solid #e74a3b; }
+.border-left-secondary { border-left: 4px solid #858796; }
+
+/* Form styles */
+#dateFilterForm {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.form-group {
+    margin-right: 1rem;
+    margin-bottom: 0.5rem;
+}
+</style>
+{% endblock %}
