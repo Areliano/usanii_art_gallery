@@ -149,6 +149,125 @@ def artworks(request):
     return render(request, "artworks.html", {"artworks": Artworks.objects.all(), "footer": Footer.objects.all()})
 
 
+# views.py
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import Artworks, Cart, CartItem
+from django.http import JsonResponse
+
+
+def get_or_create_cart(request):
+    if request.user.is_authenticated:
+        cart, created = Cart.objects.get_or_create(user=request.user)
+    else:
+        cart, created = Cart.objects.get_or_create(session_key=request.session.session_key)
+        if created and not request.session.session_key:
+            request.session.create()
+            cart.session_key = request.session.session_key
+            cart.save()
+    return cart
+
+
+# views.py
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from .models import Cart, CartItem, Artworks
+
+from django.http import JsonResponse
+
+
+def add_to_cart(request, artwork_id):
+    artwork = get_object_or_404(Artworks, id=artwork_id)
+
+    # Get or create cart
+    if request.user.is_authenticated:
+        cart, created = Cart.objects.get_or_create(user=request.user)
+    else:
+        cart, created = Cart.objects.get_or_create(session_key=request.session.session_key)
+        if created and not request.session.session_key:
+            request.session.create()
+            cart.session_key = request.session.session_key
+            cart.save()
+
+    # Get existing cart item or create new one
+    cart_item, created = CartItem.objects.get_or_create(
+        cart=cart,
+        artwork=artwork,
+        defaults={'quantity': 1}  # Only set quantity=1 when creating new
+    )
+
+    if not created:
+        # If item already exists, increment quantity
+        cart_item.quantity += 1
+        cart_item.save()
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'message': f'Successfully added {artwork.title} to your cart',
+            'cart_count': cart.items.count(),
+            'new_quantity': cart_item.quantity,
+            'item_total': cart_item.total_price,
+            'cart_total': cart.total_price
+        })
+
+    return redirect('artworks')
+
+def view_cart(request):
+    try:
+        if request.user.is_authenticated:
+            cart = Cart.objects.get(user=request.user)
+        else:
+            cart = Cart.objects.get(session_key=request.session.session_key)
+    except Cart.DoesNotExist:
+        cart = None
+
+    return render(request, "cart.html", {
+        "cart": cart,
+        "footer": Footer.objects.all()
+    })
+
+def remove_from_cart(request, item_id):
+    cart_item = get_object_or_404(CartItem, id=item_id)
+    cart = cart_item.cart
+
+    # Check if the cart belongs to the user or session
+    if (request.user.is_authenticated and cart.user == request.user) or \
+            (not request.user.is_authenticated and cart.session_key == request.session.session_key):
+        cart_item.delete()
+        messages.success(request, 'Artwork removed from cart successfully!')
+    else:
+        messages.error(request, 'You cannot remove this item.')
+
+    return redirect('view_cart')
+
+
+def update_cart_item(request, item_id):
+    cart_item = get_object_or_404(CartItem, id=item_id)
+    cart = cart_item.cart
+
+    if (request.user.is_authenticated and cart.user == request.user) or \
+            (not request.user.is_authenticated and cart.session_key == request.session.session_key):
+        quantity = int(request.POST.get('quantity', 1))
+        if quantity > 0:
+            cart_item.quantity = quantity
+            cart_item.save()
+            messages.success(request, 'Cart updated successfully!')
+        else:
+            cart_item.delete()
+            messages.success(request, 'Artwork removed from cart successfully!')
+    else:
+        messages.error(request, 'You cannot update this item.')
+
+    return redirect('view_cart')
+
+
+def checkout(request):
+    return render(request, "checkout.html", {
+        "footer": Footer.objects.all()
+    })
+
 def exhibitions(request):
     exhibitions = Exhibition.objects.all()
     for exhibition in exhibitions:

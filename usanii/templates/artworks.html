@@ -18,9 +18,22 @@
   </div>
 </section>
 
-
 <section class="ftco-section" style="background: white; padding-top: 50px;">
     <div class="container">
+        <!-- Cart Icon (Added at the top right) -->
+        <div class="text-right mb-4" style="position: relative;">
+            <a href="{% url 'view_cart' %}" class="btn btn-outline-primary" style="border-radius: 30px; position: relative;">
+                <i class="ion-ios-cart"></i> Cart
+                <span id="cart-count" class="badge badge-danger" style="position: absolute; top: -10px; right: -10px; border-radius: 50%;">
+                    {% if request.user.is_authenticated and request.user.cart %}
+                        {{ request.user.cart.items.count }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </span>
+            </a>
+        </div>
+
         <div class="row justify-content-center mb-5 pb-2">
             <div class="col-md-7 text-center heading-section ftco-animate">
                 <span class="subheading mb-2" style="color: #FF6F61; font-weight: bold; font-family: 'Poppins', sans-serif;">Our Artworks</span>
@@ -38,15 +51,25 @@
                         <p class="card-text" style="color: #7f8c8d; font-size: 1rem;">Artist Name: {{ artworks.name }}</p>
                         <p class="card-text" style="color: #e74c3c; font-size: 1.2rem;">Artwork Price: Kshs. {{ artworks.price }}</p>
 
-                        <button class="btn {% if artworks.available %}btn-success{% else %}btn-danger{% endif %} inquiry-btn"
-                            data-title="{{ artworks.title }}" data-image="{{ artworks.image.url }}"
-                            style="padding: 10px 20px; font-size: 1rem; border-radius: 30px; border: none; transition: background-color 0.3s ease;">
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <button class="btn {% if artworks.available %}btn-success{% else %}btn-danger{% endif %} inquiry-btn"
+                                data-title="{{ artworks.title }}" data-image="{{ artworks.image.url }}"
+                                style="padding: 8px 15px; font-size: 0.9rem; border-radius: 30px; border: none; transition: background-color 0.3s ease;">
+                                {% if artworks.available %}
+                                    Available
+                                {% else %}
+                                    Unavailable
+                                {% endif %}
+                            </button>
+
                             {% if artworks.available %}
-                                Available
-                            {% else %}
-                                Unavailable
+                            <button class="btn btn-primary add-to-cart"
+                                    data-artwork-id="{{ artworks.id }}"
+                                    style="padding: 8px 15px; font-size: 0.9rem; border-radius: 30px; border: none;">
+                                Add to Cart
+                            </button>
                             {% endif %}
-                        </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -182,6 +205,42 @@
         gap: 5px;
     }
 
+    /* Cart specific styles */
+    .badge-danger {
+        background-color: #e74c3c;
+    }
+
+    .btn-outline-primary {
+        color: #e74c3c;
+        border-color: #e74c3c;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #e74c3c;
+        color: white;
+    }
+
+    .ion-ios-cart {
+        font-size: 1.2rem;
+        vertical-align: middle;
+    }
+
+    /* Add to your existing styles */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.spinner-border {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    vertical-align: text-bottom;
+    border: 0.2em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+}
 </style>
 
 <script>
@@ -217,31 +276,29 @@
         inquiryForm.addEventListener("submit", function (event) {
             event.preventDefault();
 
-            // Validate Name (only letters and spaces allowed)
             const nameField = document.getElementById("name");
+            const emailField = document.getElementById("email");
+            const phoneField = document.getElementById("phone");
+
             const nameRegex = /^[A-Za-z\s]+$/;
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            const phoneRegex = /^\d{10}$/;
+
             if (!nameRegex.test(nameField.value)) {
                 alert("Name can only contain letters and spaces.");
                 return;
             }
 
-            // Validate Email (must be a valid email format)
-            const emailField = document.getElementById("email");
-            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             if (!emailRegex.test(emailField.value)) {
                 alert("Invalid email address.");
                 return;
             }
 
-            // Validate Phone (must be exactly 10 digits)
-            const phoneField = document.getElementById("phone");
-            const phoneRegex = /^\d{10}$/;
             if (!phoneRegex.test(phoneField.value)) {
                 alert("Phone number should be exactly 10 digits.");
                 return;
             }
 
-            // If validation passes, proceed with AJAX submission
             const formData = new FormData(inquiryForm);
 
             fetch(inquiryForm.action, {
@@ -268,6 +325,78 @@
                 formResponse.style.color = "red";
             });
         });
+
+        // Improved Add to Cart functionality
+        document.querySelectorAll('.add-to-cart').forEach(button => {
+            button.addEventListener('click', function () {
+                const artworkId = this.dataset.artworkId;
+                const btn = this;
+
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding...';
+
+                fetch(`/add-to-cart/${artworkId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('cart-count').textContent = data.cart_count;
+                        showToast(data.message, 'success');
+                    } else {
+                        showToast('Failed to add to cart', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('An error occurred. Please try again.', 'error');
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = 'Add to Cart';
+                });
+            });
+        });
+
+        // Toast Notification Helper
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.right = '20px';
+            toast.style.padding = '12px 24px';
+            toast.style.borderRadius = '5px';
+            toast.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+            toast.style.zIndex = '1000';
+            toast.style.color = 'white';
+            toast.style.transition = 'all 0.3s ease';
+            toast.style.transform = 'translateY(20px)';
+            toast.style.opacity = '0';
+
+            toast.style.backgroundColor = type === 'success' ? '#28a745' : '#dc3545';
+            toast.textContent = message;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.transform = 'translateY(0)';
+                toast.style.opacity = '1';
+            }, 10);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
     });
 </script>
 

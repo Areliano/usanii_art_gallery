@@ -51,7 +51,16 @@ urlpatterns = [
     # Report URLs ...
     path('admin/reports/', generate_reports, name='generate_reports'),
     path('admin/reports/data/', generate_reports, name='report_data'),  # For AJAX requests
+
+    # cart urls
+
+    path('add-to-cart/<int:artwork_id>/', views.add_to_cart, name='add_to_cart'),
+    path('cart/', views.view_cart, name='view_cart'),
+    path('remove-from-cart/<int:item_id>/', views.remove_from_cart, name='remove_from_cart'),
+    path('update-cart-item/<int:item_id>/', views.update_cart_item, name='update_cart_item'),
+    path('checkout/', views.checkout, name='checkout'),
 ]
+
 
 
 
