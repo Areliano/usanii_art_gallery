@@ -150,3 +150,19 @@ admin.site.register(Moreartist)
 admin.site.site_header = "Usanii Mashariki Administration"
 admin.site.site_title = "Usanii Mashariki Panel"
 admin.site.index_title = "Manage Art Gallery Data"
+
+# admin.py
+from django.contrib import admin
+from .models import Payment, Order
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ('reference', 'phone_number', 'amount', 'status', 'transaction_date')
+    search_fields = ('reference', 'phone_number')
+    list_filter = ('status', 'transaction_date')
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ('order_number', 'user', 'total_amount', 'created_at', 'is_delivered')
+    search_fields = ('order_number', 'user__username')
+    list_filter = ('is_delivered', 'created_at')

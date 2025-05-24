@@ -144,3 +144,4 @@ SITE_ID = 1
 # Redirects after login/logout
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
+

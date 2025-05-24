@@ -1,0 +1,59 @@
+{% extends 'common.html' %}
+{% load static %}
+
+{% block body %}
+<section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/art.png' %}'); height: 50vh; background-size: cover;">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row no-gutters slider-text align-items-center justify-content-center">
+      <div class="col-md-9 ftco-animate text-center" style="background: rgba(255, 196, 196, 0.7); border-radius: 10px; padding: 40px;">
+        <h1 class="mb-2 bread" style="font-family: 'Georgia', serif; color: #5e2f4e;">Complete Payment</h1>
+        <p class="breadcrumbs" style="color: #5e2f4e;">
+          <span class="mr-2"><a href="{% url 'home' %}" style="color: #5e2f4e;">Home <i class="ion-ios-arrow-forward"></i></a></span>
+          <span>Payment Processing <i class="ion-ios-arrow-forward"></i></span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ftco-section" style="background: white; padding-top: 50px;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <div class="card" style="border-radius: 12px; box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);">
+                    <div class="card-body">
+                        <img src="{% static 'images/mpesa.png' %}" alt="M-Pesa" class="img-fluid mb-4" style="max-height: 100px;">
+                        <h3 style="font-family: 'Roboto', sans-serif; color: #2c3e50;">Payment Simulation Complete</h3>
+
+                        <div class="alert alert-info">
+                            <p>This is a school project simulation. No real payment was processed.</p>
+                        </div>
+
+                        <p style="color: #7f8c8d;">Reference: <strong>{{ reference }}</strong></p>
+
+                        <div class="spinner-border text-primary mt-3 mb-3" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+
+                        <div class="mt-4">
+                            <a href="{% url 'payment_success' %}?reference={{ reference }}" class="btn btn-primary">
+                                <i class="fas fa-check"></i> Continue to Order Summary
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- In payment_processing.html, update the JavaScript to: -->
+<script>
+// Redirect immediately since this is a simulation
+setTimeout(() => {
+    window.location.href = "/payment-success/?reference={{ reference }}";
+}, 2000);
+</script>
+
+{% endblock %}

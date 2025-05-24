@@ -1,0 +1,157 @@
+{% extends 'common.html' %}
+{% load static %}
+
+{% block body %}
+
+<section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/art.png' %}'); height: 50vh; background-size: cover;">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row no-gutters slider-text align-items-center justify-content-center">
+      <div class="col-md-9 ftco-animate text-center" style="background: rgba(255, 196, 196, 0.7); border-radius: 10px; padding: 40px;">
+        <h1 class="mb-2 bread" style="font-family: 'Georgia', serif; color: #5e2f4e;">Checkout</h1>
+        <p class="breadcrumbs" style="color: #5e2f4e;">
+          <span class="mr-2"><a href="{% url 'home' %}" style="color: #5e2f4e;">Home <i class="ion-ios-arrow-forward"></i></a></span>
+          <span>Checkout <i class="ion-ios-arrow-forward"></i></span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ftco-section" style="background: white; padding-top: 50px;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card mb-4" style="border-radius: 12px; box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);">
+                    <div class="card-body">
+                        <h3 style="font-family: 'Roboto', sans-serif; color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 10px;">Order Summary</h3>
+
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Artwork</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in cart.items.all %}
+                                    <tr>
+                                        <td>
+                                            <img src="{{ item.artwork.image.url }}" alt="{{ item.artwork.title }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                                            {{ item.artwork.title }}
+                                        </td>
+                                        <td>Kshs. {{ item.artwork.price }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>Kshs. {{ item.total_price }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-3">
+                            <span style="color: #7f8c8d;">Subtotal</span>
+                            <span style="font-weight: bold;">Kshs. {{ cart.total_price }}</span>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-4">
+                            <span style="color: #2c3e50; font-weight: bold;">Total</span>
+                            <span style="color: #e74c3c; font-weight: bold;">Kshs. {{ cart.total_price }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- M-Pesa STK Push Payment Form -->
+                <!-- In your checkout.html, replace the payment form section with this: -->
+<div class="card" style="border-radius: 12px; box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);">
+    <div class="card-body">
+        <h3 style="font-family: 'Roboto', sans-serif; color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 10px;">Simulated Payment</h3>
+
+        <div class="alert alert-warning">
+            <strong>NOTE:</strong> This is a school project simulation. No real payment will be processed.
+        </div>
+
+        <form id="paymentForm" method="POST" action="{% url 'process_payment' %}">
+            {% csrf_token %}
+            <input type="hidden" name="amount" value="{{ cart.total_price }}">
+            <input type="hidden" name="cart_id" value="{{ cart.id }}">
+
+            <div class="form-group">
+                <label for="phone">Phone Number (for simulation)</label>
+                <input type="tel" class="form-control" id="phone" name="phone"
+                       placeholder="e.g. 0712345678" required
+                       pattern="^(0|\+?254)\d{9}$"
+                       title="Please enter a valid phone number (e.g. 0712345678 or +254712345678)">
+                <small class="form-text text-muted">Enter any phone number for simulation</small>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" id="payButton"
+                    style="border-radius: 30px; background-color: #e74c3c; border: none; padding: 12px;">
+                Simulate Payment of Kshs. {{ cart.total_price }}
+            </button>
+        </form>
+
+        <div class="text-center mt-3">
+            <a href="{% url 'view_cart' %}" class="btn btn-outline-secondary" style="border-radius: 30px;">Back to Cart</a>
+        </div>
+    </div>
+</div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .table th, .table td {
+        vertical-align: middle;
+    }
+
+    .form-control {
+        border-radius: 30px;
+        padding: 12px 20px;
+        border: 1px solid #ced4da;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+</style>
+
+<script>
+document.getElementById('paymentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('payButton');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Initiating Payment...';
+
+    fetch(this.action, {
+        method: 'POST',
+        body: new FormData(this),
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = "{% url 'payment_processing' %}?reference=" + data.reference;
+        } else {
+            alert(data.message);
+            btn.disabled = false;
+            btn.innerHTML = 'Try Payment Again';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+        btn.disabled = false;
+        btn.innerHTML = 'Try Payment Again';
+    });
+});
+</script>
+
+{% endblock %}

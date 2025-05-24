@@ -81,6 +81,38 @@ class CartItem(models.Model):
     def __str__(self):
         return f"{self.quantity} x {self.artwork.title} (Kshs. {self.total_price})"
 
+# models.py
+from django.db import models
+from django.contrib.auth.models import User
+from django.utils import timezone
+import uuid
+
+class Payment(models.Model):
+    phone_number = models.CharField(max_length=15)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    receipt_number = models.CharField(max_length=50, default='SIM' + str(timezone.now().timestamp())[:8])
+    status = models.CharField(max_length=20, default='pending')
+    transaction_date = models.DateTimeField(auto_now_add=True)
+    reference = models.CharField(max_length=50, unique=True)
+    delivery_address = models.TextField(blank=True, null=True)
+    customer_email = models.EmailField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Payment #{self.reference} - Kshs. {self.amount}"
+
+class Order(models.Model):
+    order_number = models.CharField(max_length=50, unique=True, default=uuid.uuid4)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    session_key = models.CharField(max_length=40, null=True, blank=True)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, null=True, blank=True)
+    is_delivered = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Order #{self.order_number}"
+
+
 
 class Exhibition(models.Model):
     title = models.CharField(max_length=255)

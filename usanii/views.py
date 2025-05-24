@@ -581,3 +581,126 @@ def get_exhibition_attendance_data():
         'current_attendees': [exh.current_attendees for exh in exhibitions],
         'bookings_count': [exh.bookings_count for exh in exhibitions],
     }
+
+
+# views.py
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+from .models import Cart, Footer, Order, Payment
+from .mpesa import initiate_stk_push
+import uuid
+import json
+from django.utils import timezone
+
+
+def checkout(request):
+    try:
+        if request.user.is_authenticated:
+            cart = Cart.objects.get(user=request.user)
+        else:
+            cart = Cart.objects.get(session_key=request.session.session_key)
+    except Cart.DoesNotExist:
+        return redirect('view_cart')
+
+    return render(request, "checkout.html", {
+        "cart": cart,
+        "footer": Footer.objects.all()
+    })
+
+
+def process_payment(request):
+    if request.method == 'POST':
+        phone = request.POST.get('phone')
+        amount = request.POST.get('amount')
+        reference = f"ART{str(uuid.uuid4().int)[:8]}"
+
+        # Format phone number
+        if phone.startswith('0'):
+            phone = f"254{phone[1:]}"
+        elif phone.startswith('+'):
+            phone = phone[1:]
+
+        # Create simulated payment
+        payment = Payment.objects.create(
+            phone_number=phone,
+            amount=amount,
+            receipt_number=f"SIM{timezone.now().strftime('%Y%m%d%H%M%S')}",
+            status='completed',
+            reference=reference
+        )
+
+        # Create order
+        order = Order.objects.create(
+            order_number=reference,
+            user=request.user if request.user.is_authenticated else None,
+            session_key=request.session.session_key if not request.user.is_authenticated else None,
+            total_amount=amount,
+            payment=payment
+        )
+
+        return JsonResponse({
+            'success': True,
+            'message': '[SIMULATION] Payment successful! No real STK Push was sent.',
+            'reference': reference
+        })
+
+    return redirect('checkout')
+
+
+def payment_processing(request):
+    reference = request.GET.get('reference')
+    return render(request, "payment_processing.html", {
+        'reference': reference,
+        'footer': Footer.objects.all()
+    })
+
+
+# views.py
+def payment_success(request):
+    reference = request.GET.get('reference')
+    try:
+        order = Order.objects.get(order_number=reference)
+
+        if request.method == 'POST':
+            # Handle delivery information form submission
+            order.payment.delivery_address = request.POST.get('delivery_address')
+            order.payment.customer_email = request.POST.get('customer_email')
+            order.payment.save()
+            messages.success(request, "Delivery information saved successfully!")
+            # Redirect back to the same page with the reference
+            return redirect(f'/payment-success/?reference={reference}')
+
+        # Clear cart after successful payment
+        if request.user.is_authenticated:
+            Cart.objects.filter(user=request.user).delete()
+        else:
+            Cart.objects.filter(session_key=request.session.session_key).delete()
+            if 'cart_id' in request.session:
+                del request.session['cart_id']
+
+        return render(request, "payment_success.html", {
+            'order': order,
+            'payment': order.payment,
+            'footer': Footer.objects.all()
+        })
+    except Order.DoesNotExist:
+        messages.error(request, "Order not found")
+        return redirect('home')
+
+
+# These can be kept but won't be used in simulation
+@csrf_exempt
+def payment_callback(request):
+    return JsonResponse({'ResultCode': 0, 'ResultDesc': 'Success'})
+
+
+@csrf_exempt
+def pay_with_mpesa(request):
+    return JsonResponse({"message": "Simulation mode - no real payments"})
+
+
+@csrf_exempt
+def mpesa_callback(request):
+    return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted"})

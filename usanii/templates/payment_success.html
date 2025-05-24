@@ -1,0 +1,89 @@
+{% extends 'common.html' %}
+{% load static %}
+
+{% block body %}
+
+<section class="hero-wrap hero-wrap-2" style="background-image: url('{% static 'images/art.png' %}'); height: 50vh; background-size: cover;">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row no-gutters slider-text align-items-center justify-content-center">
+      <div class="col-md-9 ftco-animate text-center" style="background: rgba(255, 196, 196, 0.7); border-radius: 10px; padding: 40px;">
+        <h1 class="mb-2 bread" style="font-family: 'Georgia', serif; color: #5e2f4e;">Payment Successful</h1>
+        <p class="breadcrumbs" style="color: #5e2f4e;">
+          <span class="mr-2"><a href="{% url 'home' %}" style="color: #5e2f4e;">Home <i class="ion-ios-arrow-forward"></i></a></span>
+          <span>Payment Success <i class="ion-ios-arrow-forward"></i></span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ftco-section" style="background: white; padding-top: 50px;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card" style="border-radius: 12px; box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);">
+                    <div class="card-body text-center">
+                        <div class="mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="#28a745" viewBox="0 0 16 16">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                            </svg>
+                        </div>
+
+                        <h3 style="font-family: 'Roboto', sans-serif; color: #2c3e50;">Thank You for Your Purchase!</h3>
+                        <p style="color: #7f8c8d;">Your order has been received.</p>
+
+                        <div class="alert alert-warning">
+                            <strong>NOTE:</strong> This is a simulation for school project. No real payment was processed.
+                        </div>
+
+                        <div class="order-details mt-4" style="background: #f8f9fa; border-radius: 8px; padding: 20px;">
+                            <h4 style="font-family: 'Roboto', sans-serif; color: #34495e;">Order Details</h4>
+                            <p style="color: #7f8c8d;">Order Number: <strong>{{ order.order_number }}</strong></p>
+                            <p style="color: #7f8c8d;">Date: <strong>{{ order.created_at|date:"F j, Y" }}</strong></p>
+                            <p style="color: #7f8c8d;">Total Paid: <strong>Kshs. {{ order.total_amount }}</strong></p>
+                            <p style="color: #7f8c8d;">Phone Number: <strong>{{ payment.phone_number }}</strong></p>
+                        </div>
+
+                        <div class="delivery-form mt-4">
+                            <h4 style="font-family: 'Roboto', sans-serif; color: #34495e;">Delivery Information</h4>
+                            <form method="POST" action="/payment-success/?reference={{ order.order_number }}" class="mt-3">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label for="delivery_address">Delivery Address</label>
+                                    <textarea class="form-control" id="delivery_address" name="delivery_address" rows="3" required>{% if payment.delivery_address %}{{ payment.delivery_address }}{% endif %}</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="customer_email">Email Address</label>
+                                    <input type="email" class="form-control" id="customer_email" name="customer_email" value="{% if payment.customer_email %}{{ payment.customer_email }}{% endif %}" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save Delivery Info</button>
+                            </form>
+                        </div>
+
+                        {% if messages %}
+                        <div class="mt-3">
+                            {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="mt-4">
+                            <a href="{% url 'home' %}" class="btn btn-primary" style="border-radius: 30px; background-color: #e74c3c; border: none; padding: 10px 20px;">
+                                Back to Home
+                            </a>
+                            <a href="#" class="btn btn-outline-secondary" style="border-radius: 30px;">
+                                View Order History
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
