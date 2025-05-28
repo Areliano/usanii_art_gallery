@@ -1,4 +1,3 @@
-<!-- templates/reports/report.html -->
 {% extends 'common.html' %}
 {% load static %}
 
@@ -16,70 +15,79 @@
 
 <section class="ftco-section" style="background: white; padding-top: 50px;">
   <div class="container">
-    <!-- Date Range Filter -->
     <div class="card mb-4 shadow">
       <div class="card-header bg-primary text-white">
-        <h4 class="mb-0">Filter Reports</h4>
+        <h4 class="mb-0">Filter Reports by Date</h4>
       </div>
       <div class="card-body">
-        <form id="dateFilterForm" class="form-inline">
-          <div class="form-group mr-3">
+        <form id="dateFilterForm" class="form-inline justify-content-center">
+          <div class="form-group mr-3 mb-2">
             <label for="startDate" class="mr-2">From:</label>
             <input type="date" id="startDate" name="start_date" class="form-control"
                    value="{{ report_data.start_date }}">
           </div>
-          <div class="form-group mr-3">
+          <div class="form-group mr-3 mb-2">
             <label for="endDate" class="mr-2">To:</label>
             <input type="date" id="endDate" name="end_date" class="form-control"
                    value="{{ report_data.end_date }}">
           </div>
-          <button type="submit" class="btn btn-primary">Apply Filter</button>
-          <button type="button" id="resetFilter" class="btn btn-secondary ml-2">Reset</button>
+          <button type="submit" class="btn btn-primary mb-2">Apply Filter</button>
+          <button type="button" id="resetFilter" class="btn btn-secondary ml-2 mb-2">Reset</button>
         </form>
       </div>
     </div>
 
-    <!-- Summary Cards -->
     <div class="row mb-4">
-      <!-- Artists Card -->
-      <div class="col-md-4 mb-4">
-        <div class="card border-left-info h-100">
+      <div class="col-md-3 mb-4">
+        <div class="card border-left-info h-100 shadow">
           <div class="card-body">
             <div class="d-flex align-items-center">
               <i class="fas fa-paint-brush fa-3x text-info mr-3"></i>
               <div>
-                <h5 class="card-title">Total Artists</h5>
-                <h2 class="mb-0">{{ report_data.total_artists }}</h2>
+                <h5 class="card-title text-uppercase mb-1">Total Artists</h5>
+                <h2 class="mb-0" id="totalArtists">{{ report_data.total_artists }}</h2>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Artworks Card -->
-      <div class="col-md-4 mb-4">
-        <div class="card border-left-success h-100">
+      <div class="col-md-3 mb-4">
+        <div class="card border-left-success h-100 shadow">
           <div class="card-body">
             <div class="d-flex align-items-center">
               <i class="fas fa-image fa-3x text-success mr-3"></i>
               <div>
-                <h5 class="card-title">Total Artworks</h5>
-                <h2 class="mb-0">{{ report_data.total_artworks }}</h2>
+                <h5 class="card-title text-uppercase mb-1">Total Artworks</h5>
+                <h2 class="mb-0" id="totalArtworks">{{ report_data.total_artworks }}</h2>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Exhibitions Card -->
-      <div class="col-md-4 mb-4">
-        <div class="card border-left-warning h-100">
+      <div class="col-md-3 mb-4">
+        <div class="card border-left-warning h-100 shadow">
           <div class="card-body">
             <div class="d-flex align-items-center">
               <i class="fas fa-calendar-alt fa-3x text-warning mr-3"></i>
               <div>
-                <h5 class="card-title">Exhibitions</h5>
-                <h2 class="mb-0">{{ report_data.recent_exhibitions }}</h2>
+                <h5 class="card-title text-uppercase mb-1">Active Exhibitions</h5>
+                <h2 class="mb-0" id="activeExhibitions">{{ report_data.active_exhibitions }}</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 mb-4">
+        <div class="card border-left-primary h-100 shadow">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-ticket-alt fa-3x text-primary mr-3"></i>
+              <div>
+                <h5 class="card-title text-uppercase mb-1">Total Bookings</h5>
+                <h2 class="mb-0" id="totalBookings">{{ report_data.total_bookings }}</h2>
               </div>
             </div>
           </div>
@@ -87,9 +95,53 @@
       </div>
     </div>
 
-    <!-- Charts Section -->
     <div class="row mb-4">
-      <!-- Bookings Trend Chart -->
+      <div class="col-md-4 mb-4">
+        <div class="card border-left-danger h-100 shadow">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-dollar-sign fa-3x text-danger mr-3"></i>
+              <div>
+                <h5 class="card-title text-uppercase mb-1">Total Revenue</h5>
+                <h2 class="mb-0" id="totalRevenue">Kshs. {{ report_data.total_revenue_collected|floatformat:2 }}</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-4">
+        <div class="card border-left-secondary h-100 shadow">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-shopping-cart fa-3x text-secondary mr-3"></i>
+              <div>
+                <h5 class="card-title text-uppercase mb-1">Total Orders</h5>
+                <h2 class="mb-0" id="totalOrders">{{ report_data.total_orders_placed }}</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-4">
+        <div class="card border-left-info h-100 shadow">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-money-check-alt fa-3x text-info mr-3"></i>
+              <div>
+                <h5 class="card-title text-uppercase mb-1">Avg. Order Value</h5>
+                <h2 class="mb-0" id="avgOrderValue">Kshs. {{ report_data.average_order_value|floatformat:2 }}</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+    <h3>Performance Charts</h3>
+    <div class="row mb-4">
       <div class="col-md-6 mb-4">
         <div class="card shadow h-100">
           <div class="card-header bg-primary text-white">
@@ -101,7 +153,19 @@
         </div>
       </div>
 
-      <!-- Artists by Artwork Chart -->
+      <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Monthly Revenue Trend</h5>
+          </div>
+          <div class="card-body">
+            <canvas id="revenueChart" height="250"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-4">
       <div class="col-md-6 mb-4">
         <div class="card shadow h-100">
           <div class="card-header bg-primary text-white">
@@ -112,77 +176,159 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="row">
-      <!-- Exhibition Attendance Chart -->
-      <div class="col-md-12 mb-4">
+      <div class="col-md-6 mb-4">
         <div class="card shadow h-100">
           <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Exhibition Attendance</h5>
+            <h5 class="mb-0">Artist Revenue Contribution</h5>
+          </div>
+          <div class="card-body">
+            <canvas id="artistRevenueChart" height="250"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Exhibition Attendance Rate (%)</h5>
           </div>
           <div class="card-body">
             <canvas id="attendanceChart" height="250"></canvas>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Detailed Statistics -->
-    <div class="card shadow mt-4">
-      <div class="card-header bg-primary text-white">
-        <h5 class="mb-0">Booking Statistics</h5>
-      </div>
-      <div class="card-body">
-        <div class="row">
-          <div class="col-md-4 text-center">
-            <h3>{{ report_data.total_bookings }}</h3>
-            <p class="text-muted">Total Bookings</p>
+      <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Artworks by Category Distribution</h5>
           </div>
-          <div class="col-md-4 text-center">
-            <h3 class="text-success">{{ report_data.confirmed_bookings }}</h3>
-            <p class="text-muted">Confirmed</p>
-          </div>
-          <div class="col-md-4 text-center">
-            <h3 class="text-danger">{{ report_data.cancelled_bookings }}</h3>
-            <p class="text-muted">Cancelled</p>
+          <div class="card-body">
+            <canvas id="categoryChart" height="250"></canvas>
           </div>
         </div>
       </div>
     </div>
+
+    <hr>
+    <h3>Detailed Statistics & Lists</h3>
+    <div class="card shadow mt-4 mb-4">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Booking & Payment Statistics</h5>
+      </div>
+      <div class="card-body">
+        <div class="row text-center mb-3">
+          <div class="col-md-4">
+            <h3 id="totalBookingsStat">{{ report_data.total_bookings }}</h3>
+            <p class="text-muted">Total Bookings</p>
+          </div>
+          <div class="col-md-4">
+            <h3 class="text-success" id="confirmedBookingsStat">{{ report_data.confirmed_bookings }}</h3>
+            <p class="text-muted">Confirmed Bookings</p>
+          </div>
+          <div class="col-md-4">
+            <h3 class="text-danger" id="cancelledBookingsStat">{{ report_data.cancelled_bookings }}</h3>
+            <p class="text-muted">Cancelled Bookings</p>
+          </div>
+        </div>
+        <hr>
+        <div class="row text-center">
+          <div class="col-md-6">
+            <h3 class="text-success" id="successfulPaymentsStat">{{ report_data.successful_payments }}</h3>
+            <p class="text-muted">Successful Payments</p>
+          </div>
+          <div class="col-md-6">
+            <h3 id="totalRevenueStatBottom">Kshs. {{ report_data.total_revenue_collected|floatformat:2 }}</h3>
+            <p class="text-muted">Total Revenue</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow mt-4 mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Top 5 Selling Artworks</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Artwork Title</th>
+                            <th>Quantity Sold</th>
+                            <th>Total Revenue (Kshs)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topSellingArtworksTableBody">
+                        <tr><td colspan="3" class="text-center text-muted">Loading top selling artworks...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            {% comment %} Optionally add a chart for top selling artworks here if you want {% endcomment %}
+        </div>
+    </div>
+
+    <div class="card shadow mt-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Most Frequent Customers (Top 10)</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Total Orders</th>
+                            <th>Total Bookings</th>
+                            <th>Total Spend (Kshs)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mostFrequentCustomersTableBody">
+                        <tr><td colspan="4" class="text-center text-muted">Loading most frequent customers...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
   </div>
 </section>
 
-<!-- Include Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/moment"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // Initialize chart variables
+    // Initialize chart variables to null so we can destroy and re-create them
     let bookingsChart = null;
     let artistsChart = null;
     let attendanceChart = null;
+    let revenueChart = null;
+    let categoryChart = null;
+    let artistRevenueChart = null;
 
-    // Load initial chart data
-    fetchChartData();
+    // Load initial chart data when the page loads
+    fetchReportData();
 
-    // Form submission handler
+    // Form submission handler for date filter
     document.getElementById('dateFilterForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        fetchChartData();
+        fetchReportData();
     });
 
     // Reset filter handler
     document.getElementById('resetFilter').addEventListener('click', function() {
         document.getElementById('startDate').value = '';
         document.getElementById('endDate').value = '';
-        fetchChartData();
+        fetchReportData();
     });
 
-    // Function to fetch chart data
-    function fetchChartData() {
+    // Function to fetch all report data via AJAX
+    function fetchReportData() {
         const startDate = document.getElementById('startDate').value;
         const endDate = document.getElementById('endDate').value;
 
@@ -199,46 +345,86 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         })
         .then(response => {
-            console.log('Response status:', response.status);
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                console.error('Network response was not ok. Status:', response.status);
+                return response.text().then(text => { throw new Error(text) });
             }
             return response.json();
         })
         .then(data => {
-            console.log('Received data:', data);
+            console.log('Received report data:', data);
             if (data.chart_data && data.report_data) {
+                updateSummaryCards(data.report_data);
                 updateCharts(data.chart_data);
-                updateStats(data.report_data);
+                updateDetailedTables(data.chart_data);
             } else {
                 console.error('Invalid data format received:', data);
-                alert('Received invalid data format. Check console for details.');
+                alert('Received invalid data format from server. Please check console for details.');
             }
         })
         .catch(error => {
-            console.error('Error fetching chart data:', error);
+            console.error('Error fetching report data:', error);
             alert('Failed to load report data: ' + error.message);
         });
     }
 
-    // Function to update charts
+    // Function to update the numbers in the summary cards
+    function updateSummaryCards(reportData) {
+        // Convert all numeric values to numbers if they aren't already
+        const revenue = typeof reportData.total_revenue_collected === 'string' ?
+            parseFloat(reportData.total_revenue_collected.replace(',', '')) :
+            Number(reportData.total_revenue_collected);
+
+        const avgOrderValue = typeof reportData.average_order_value === 'string' ?
+            parseFloat(reportData.average_order_value.replace(',', '')) :
+            Number(reportData.average_order_value);
+
+        document.getElementById('totalArtists').textContent = reportData.total_artists;
+        document.getElementById('totalArtworks').textContent = reportData.total_artworks;
+        document.getElementById('activeExhibitions').textContent = reportData.active_exhibitions;
+        document.getElementById('totalBookings').textContent = reportData.total_bookings;
+
+        document.getElementById('totalRevenue').textContent = `Kshs. ${revenue.toFixed(2)}`;
+        document.getElementById('totalOrders').textContent = reportData.total_orders_placed;
+        document.getElementById('avgOrderValue').textContent = `Kshs. ${avgOrderValue.toFixed(2)}`;
+
+        // Update detailed statistics at the bottom
+        document.getElementById('totalBookingsStat').textContent = reportData.total_bookings;
+        document.getElementById('confirmedBookingsStat').textContent = reportData.confirmed_bookings;
+        document.getElementById('cancelledBookingsStat').textContent = reportData.cancelled_bookings;
+        document.getElementById('successfulPaymentsStat').textContent = reportData.successful_payments;
+        document.getElementById('totalRevenueStatBottom').textContent = `Kshs. ${revenue.toFixed(2)}`;
+    }
+
+    // Function to update all charts with new data
     function updateCharts(chartData) {
         try {
-            if (chartData.bookings_trend) {
-                updateBookingsChart(chartData.bookings_trend);
-            }
-            if (chartData.artists_by_artwork) {
-                updateArtistsChart(chartData.artists_by_artwork);
-            }
-            if (chartData.exhibition_attendance) {
-                updateAttendanceChart(chartData.exhibition_attendance);
-            }
+            updateBookingsChart(chartData.bookings_trend);
+            updateArtistsChart(chartData.artists_by_artwork);
+            updateAttendanceChart(chartData.exhibition_attendance);
+            updateRevenueChart(chartData.monthly_revenue_trend);
+            updateCategoryChart(chartData.artwork_category_distribution);
+            updateArtistRevenueChart(chartData.artist_revenue_contribution);
         } catch (chartError) {
-            console.error('Error updating charts:', chartError);
+            console.error('Error updating one or more charts:', chartError);
         }
     }
 
-    // Function to update stats
+    // Function to update detailed tables
+    function updateDetailedTables(chartData) {
+        try {
+            updateTopSellingArtworksTable(chartData.top_selling_artworks?.details || []);
+            updateMostFrequentCustomersTable(chartData.most_frequent_customers || []);
+        } catch (tableError) {
+            console.error('Error updating one or more tables:', tableError);
+        }
+    }
+
+    // --- Chart Rendering Functions ---
+    // [Keep all your existing chart rendering functions exactly as they are]
+    // They're already well-written and don't need modification
+
+     // Function to update stats
     function updateStats(reportData) {
         try {
             if (reportData.recent_exhibitions !== undefined) {
@@ -408,10 +594,254 @@ document.addEventListener("DOMContentLoaded", function() {
             console.error('Error rendering attendance chart:', error);
         }
     }
+
+    // Monthly Revenue Trend Chart
+function updateRevenueChart(data) {
+    try {
+        const ctx = document.getElementById('revenueChart');
+        if (!ctx) return;
+
+        if (revenueChart) {
+            revenueChart.destroy();
+        }
+
+        revenueChart = new Chart(ctx.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: data.labels || [],
+                datasets: [{
+                    label: 'Monthly Revenue (Kshs)',
+                    data: data.data || [],
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                return `Kshs. ${context.parsed.y.toFixed(2)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'month',
+                            tooltipFormat: 'MMM YYYY'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Month'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Revenue (Kshs)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return 'Kshs. ' + value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error rendering revenue chart:', error);
+    }
+}
+
+// Artist Revenue Contribution Chart
+function updateArtistRevenueChart(data) {
+    try {
+        const ctx = document.getElementById('artistRevenueChart');
+        if (!ctx) return;
+
+        if (artistRevenueChart) {
+            artistRevenueChart.destroy();
+        }
+
+        // Generate distinct colors for each artist
+        const backgroundColors = (data.labels || []).map((_, i) => {
+            const hue = (i * 360 / Math.max(1, data.labels?.length || 1)) % 360;
+            return `hsla(${hue}, 70%, 50%, 0.7)`;
+        });
+
+        artistRevenueChart = new Chart(ctx.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: data.labels || [],
+                datasets: [{
+                    label: 'Revenue Contribution (Kshs)',
+                    data: data.data || [],
+                    backgroundColor: backgroundColors,
+                    borderColor: backgroundColors.map(c => c.replace('0.7', '1')),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y', // Horizontal bar chart
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `Kshs. ${context.parsed.x.toFixed(2)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Revenue (Kshs)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return 'Kshs. ' + value;
+                            }
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Artist'
+                        }
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error rendering artist revenue chart:', error);
+    }
+}
+
+// Artwork Category Distribution Chart
+function updateCategoryChart(data) {
+    try {
+        const ctx = document.getElementById('categoryChart');
+        if (!ctx) return;
+
+        if (categoryChart) {
+            categoryChart.destroy();
+        }
+
+        // Predefined colors for categories
+        const backgroundColors = [
+            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+            '#FF9F40', '#8AC24A', '#FF5722', '#607D8B', '#9C27B0'
+        ];
+
+        categoryChart = new Chart(ctx.getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: data.labels || [],
+                datasets: [{
+                    data: data.data || [],
+                    backgroundColor: backgroundColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error rendering category chart:', error);
+    }
+}
+
+    // NEW: Update Top Selling Artworks Table with safe value handling
+    function updateTopSellingArtworksTable(data) {
+        const tableBody = document.getElementById('topSellingArtworksTableBody');
+        if (!tableBody) return;
+        tableBody.innerHTML = '';
+
+        if (data && data.length > 0) {
+            data.forEach(item => {
+                const revenue = typeof item.revenue === 'string' ?
+                    parseFloat(item.revenue.replace(',', '')) :
+                    Number(item.revenue);
+
+                const row = `
+                    <tr>
+                        <td>${item.title || 'Untitled'}</td>
+                        <td>${item.quantity || 0}</td>
+                        <td>${revenue.toFixed(2)}</td>
+                    </tr>
+                `;
+                tableBody.insertAdjacentHTML('beforeend', row);
+            });
+        } else {
+            tableBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No top selling artworks found for the selected period.</td></tr>';
+        }
+    }
+
+    // NEW: Update Most Frequent Customers Table with safe value handling
+    function updateMostFrequentCustomersTable(data) {
+        const tableBody = document.getElementById('mostFrequentCustomersTableBody');
+        if (!tableBody) return;
+        tableBody.innerHTML = '';
+
+        if (data && data.length > 0) {
+            data.forEach(customer => {
+                const totalSpend = typeof customer.total_spend === 'string' ?
+                    parseFloat(customer.total_spend.replace(',', '')) :
+                    Number(customer.total_spend);
+
+                const row = `
+                    <tr>
+                        <td>${customer.customer_name || 'Anonymous'}</td>
+                        <td>${customer.orders || 0}</td>
+                        <td>${customer.bookings || 0}</td>
+                        <td>${totalSpend.toFixed(2)}</td>
+                    </tr>
+                `;
+                tableBody.insertAdjacentHTML('beforeend', row);
+            });
+        } else {
+            tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No frequent customers found for the selected period.</td></tr>';
+        }
+    }
 });
 </script>
 
 <style>
+/* Existing styles */
 .card {
     border-radius: 10px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -428,17 +858,22 @@ document.addEventListener("DOMContentLoaded", function() {
 .border-left-info { border-left: 4px solid #36b9cc; }
 .border-left-warning { border-left: 4px solid #f6c23e; }
 .border-left-danger { border-left: 4px solid #e74a3b; }
-.border-left-secondary { border-left: 4px solid #858796; }
+.border-left-secondary { border-left: 4px solid #858796; } /* Added for new card */
 
 /* Form styles */
 #dateFilterForm {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: center; /* Center the form elements */
 }
 .form-group {
     margin-right: 1rem;
     margin-bottom: 0.5rem;
+}
+/* Ensure button styling is consistent */
+.btn.mb-2 {
+    margin-bottom: 0.5rem !important;
 }
 </style>
 {% endblock %}

@@ -49,69 +49,13 @@ class Artworks(models.Model):
     )
     title = models.CharField(max_length=255, default='artists')
     name = models.CharField(max_length=500, default='text1')
+    category = models.CharField(max_length=100, blank=True, null=True)  # Added for category reports
     image = models.ImageField(upload_to='artistworks', default='artistsworks.jpg')
     price = models.DecimalField(max_digits=10, decimal_places=2, default=5000)  # Changed from CharField
     available = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
-
-# models.py (this part is correct, just confirming)
-class Cart(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    session_key = models.CharField(max_length=40, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    @property
-    def total_price(self):
-        return sum(item.total_price for item in self.items.all())
-
-class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, related_name='items', on_delete=models.CASCADE)
-    artwork = models.ForeignKey(Artworks, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=1)
-    added_at = models.DateTimeField(auto_now_add=True)
-
-    @property
-    def total_price(self):
-        return float(self.artwork.price) * float(self.quantity)
-
-
-    def __str__(self):
-        return f"{self.quantity} x {self.artwork.title} (Kshs. {self.total_price})"
-
-# models.py
-from django.db import models
-from django.contrib.auth.models import User
-from django.utils import timezone
-import uuid
-
-class Payment(models.Model):
-    phone_number = models.CharField(max_length=15)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    receipt_number = models.CharField(max_length=50, default='SIM' + str(timezone.now().timestamp())[:8])
-    status = models.CharField(max_length=20, default='pending')
-    transaction_date = models.DateTimeField(auto_now_add=True)
-    reference = models.CharField(max_length=50, unique=True)
-    delivery_address = models.TextField(blank=True, null=True)
-    customer_email = models.EmailField(blank=True, null=True)
-
-    def __str__(self):
-        return f"Payment #{self.reference} - Kshs. {self.amount}"
-
-class Order(models.Model):
-    order_number = models.CharField(max_length=50, unique=True, default=uuid.uuid4)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    session_key = models.CharField(max_length=40, null=True, blank=True)
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    created_at = models.DateTimeField(auto_now_add=True)
-    payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, null=True, blank=True)
-    is_delivered = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"Order #{self.order_number}"
-
 
 
 class Exhibition(models.Model):
@@ -128,6 +72,7 @@ class Exhibition(models.Model):
     max_capacity = models.PositiveIntegerField(default=50)
     current_attendees = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(default=timezone.now)  # Added for better reporting
+    booking_date = models.DateTimeField(default=timezone.now)
 
     def is_full(self):
         return self.current_attendees >= self.max_capacity
@@ -165,6 +110,7 @@ class Booking(models.Model):
     booking_date = models.DateTimeField(auto_now_add=True)
     is_confirmed = models.BooleanField(default=True)
     attended = models.BooleanField(default=False)  # Track if they actually attended
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)  # Added for customer reports
 
     class Meta:
         unique_together = ('email', 'exhibition')  # Prevent duplicate bookings
@@ -220,3 +166,82 @@ class Moreartist(models.Model):
 
     def __str__(self):
         return self.name
+
+# Your existing models.py content (ensure all necessary imports are at the top)
+from django.db import models
+from django.contrib.auth.models import User
+from django.utils import timezone
+import uuid
+
+class Cart(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    session_key = models.CharField(max_length=40, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def total_price(self):
+        return sum(item.total_price for item in self.items.all())
+
+    def __str__(self):
+        if self.user:
+            return f"Cart for {self.user.username}"
+        return f"Cart for session {self.session_key or 'N/A'}"
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, related_name='items', on_delete=models.CASCADE)
+    artwork = models.ForeignKey('Artworks', on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def total_price(self):
+        return float(self.artwork.price) * float(self.quantity)
+
+    def __str__(self):
+        return f"{self.quantity} x {self.artwork.title} (Kshs. {self.total_price})"
+
+
+# Your existing Payment and Order models
+class Payment(models.Model):
+    phone_number = models.CharField(max_length=15)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    receipt_number = models.CharField(max_length=50, default='SIM' + str(timezone.now().timestamp())[:8])
+    status = models.CharField(max_length=20, default='pending', choices=[('pending', 'Pending'), ('completed', 'Completed'), ('failed', 'Failed')]) # Added choices for clarity
+    transaction_date = models.DateTimeField(auto_now_add=True)
+    reference = models.CharField(max_length=50, unique=True)
+    delivery_address = models.TextField(blank=True, null=True)
+    customer_email = models.EmailField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Payment #{self.reference} - Kshs. {self.amount} ({self.status})"
+
+class Order(models.Model):
+    order_number = models.CharField(max_length=50, unique=True, default=uuid.uuid4)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    session_key = models.CharField(max_length=40, null=True, blank=True)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, null=True, blank=True)
+    is_delivered = models.BooleanField(default=False)
+
+    @property
+    def get_items(self):
+        return self.items.all() # Relation to OrderItem
+
+    def __str__(self):
+        return f"Order #{self.order_number}"
+
+# NEW: OrderItem model to store individual items within an order
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
+    artwork = models.ForeignKey('Artworks', on_delete=models.PROTECT) # PROTECT prevents deletion of artwork if part of an order
+    quantity = models.PositiveIntegerField(default=1)
+    price_at_purchase = models.DecimalField(max_digits=10, decimal_places=2) # Store price at time of purchase
+
+    @property
+    def total_price(self):
+        return self.quantity * self.price_at_purchase
+
+    def __str__(self):
+        return f"{self.quantity} x {self.artwork.title} for Order {self.order.order_number}"

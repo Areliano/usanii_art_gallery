@@ -147,15 +147,12 @@ def home(request):
 
 def artworks(request):
     return render(request, "artworks.html", {"artworks": Artworks.objects.all(), "footer": Footer.objects.all()})
-
-
 # views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Artworks, Cart, CartItem
 from django.http import JsonResponse
-
 
 def get_or_create_cart(request):
     if request.user.is_authenticated:
@@ -465,58 +462,96 @@ def moreartist(request):
     })
 
 
-from datetime import datetime
-from django.db.models import Count, Q, Case, When, F, ExpressionWrapper, FloatField
+from datetime import datetime, timedelta
+from django.db.models import Count, Q, Case, When, F, ExpressionWrapper, FloatField, Sum, Avg
+from django.db.models.functions import TruncMonth, TruncDay
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import user_passes_test
 from django.views.decorators.http import require_http_methods
-from .models import Artists, Artworks, Exhibition, Booking, Footer
+from django.contrib.auth.models import User # Required for customer reports
+
+# Import all your relevant models
+from .models import Artists, Artworks, Exhibition, Booking, Footer, Order, Payment, OrderItem, Cart
 
 @user_passes_test(lambda u: u.is_superuser)
 def generate_reports(request):
     # Date range handling
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
+    start_date_str = request.GET.get('start_date')
+    end_date_str = request.GET.get('end_date')
 
-    # Convert dates if provided
-    if start_date:
-        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
-    if end_date:
-        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+    start_date = None
+    end_date = None
+
+    # Parse dates if provided
+    if start_date_str:
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+    if end_date_str:
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+
+    # Set default date range if not provided (e.g., last 30 days)
+    if not start_date and not end_date:
+        end_date = timezone.localdate()
+        start_date = end_date - timedelta(days=30)
+    elif not start_date and end_date: # If only end date is provided
+        start_date = end_date - timedelta(days=30)
+    elif start_date and not end_date: # If only start date is provided
+        end_date = timezone.localdate() # Set end date to today
 
     # Base querysets
-    artists = Artists.objects.all()
-    artworks = Artworks.objects.all()
-    exhibitions = Exhibition.objects.all()
-    bookings = Booking.objects.all()
+    artists_qs = Artists.objects.all()
+    artworks_qs = Artworks.objects.all()
+    exhibitions_qs = Exhibition.objects.all()
+    bookings_qs = Booking.objects.all()
+    payments_qs = Payment.objects.all()
+    orders_qs = Order.objects.all()
+    order_items_qs = OrderItem.objects.all()
 
-    # Apply date filters if provided
+    # Apply date filters to relevant querysets
     if start_date and end_date:
-        exhibitions = exhibitions.filter(
+        exhibitions_qs = exhibitions_qs.filter(
             Q(date__range=[start_date, end_date]) |
             Q(created_at__date__range=[start_date, end_date])
-        )
-        bookings = bookings.filter(booking_date__date__range=[start_date, end_date])
+        ).distinct()
 
-    # Generate report data
+        bookings_qs = bookings_qs.filter(booking_date__date__range=[start_date, end_date])
+        payments_qs = payments_qs.filter(transaction_date__date__range=[start_date, end_date])
+        orders_qs = orders_qs.filter(created_at__date__range=[start_date, end_date])
+        order_items_qs = order_items_qs.filter(order__created_at__date__range=[start_date, end_date])
+
+    # --- Generate Report Data (Summary Cards) ---
+    total_revenue = payments_qs.filter(status='completed').aggregate(Sum('amount'))['amount__sum'] or 0
+    total_orders = orders_qs.filter(payment__status='completed').count()
+    average_order_value_agg = orders_qs.filter(payment__status='completed').aggregate(Avg('total_amount'))['total_amount__avg']
+    average_order_value = round(float(average_order_value_agg), 2) if average_order_value_agg else 0
+
+    # Ensure all numeric values are properly converted to float
     report_data = {
-        'total_artists': artists.count(),
-        'total_artworks': artworks.count(),
-        'recent_exhibitions': exhibitions.count(),
-        'total_bookings': bookings.count(),
-        'cancelled_bookings': bookings.filter(is_confirmed=False).count(),
-        'confirmed_bookings': bookings.filter(is_confirmed=True).count(),
+        'total_artists': artists_qs.count(),
+        'total_artworks': artworks_qs.count(),
+        'active_exhibitions': exhibitions_qs.filter(date__gte=timezone.localdate()).count(),
+        'total_revenue_collected': float(total_revenue),
+        'total_orders_placed': total_orders,
+        'successful_payments': payments_qs.filter(status='completed').count(),
+        'total_bookings': bookings_qs.count(),
+        'confirmed_bookings': bookings_qs.filter(is_confirmed=True).count(),
+        'cancelled_bookings': bookings_qs.filter(is_confirmed=False).count(),
+        'average_order_value': average_order_value,
         'start_date': start_date.strftime('%Y-%m-%d') if start_date else '',
         'end_date': end_date.strftime('%Y-%m-%d') if end_date else '',
     }
 
-    # For AJAX requests, return JSON for charts
+    # For AJAX requests, return JSON for charts and tables
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         chart_data = {
             'artists_by_artwork': get_artists_by_artwork_data(),
             'bookings_trend': get_bookings_trend_data(start_date, end_date),
             'exhibition_attendance': get_exhibition_attendance_data(),
+            'monthly_revenue_trend': get_monthly_revenue_trend(start_date, end_date),
+            'top_selling_artworks': get_top_selling_artworks_data(start_date, end_date),
+            'artwork_category_distribution': get_artwork_category_distribution(),
+            'artist_revenue_contribution': get_artist_revenue_contribution_data(start_date, end_date),
+            'most_frequent_customers': get_most_frequent_customers_data(start_date, end_date),
         }
         return JsonResponse({'report_data': report_data, 'chart_data': chart_data})
 
@@ -525,28 +560,52 @@ def generate_reports(request):
         'footer': Footer.objects.all()
     })
 
+# --- Helper functions for charts and detailed data ---
+from django.db.models import Count
+from .models import Artists
+
 def get_artists_by_artwork_data():
+    """Returns data for artists by the number of artworks they have."""
     try:
         artists = Artists.objects.annotate(
-            num_artworks=Count('artworks')  # Changed from artwork_count to num_artworks
+            num_artworks=Count('artworks')  # 'artworks' is correct based on your related_name
         ).filter(
             num_artworks__gt=0
-        ).order_by('-num_artworks')
+        ).order_by('-num_artworks')[:10]  # Top 10 artists by artwork count
 
         return {
             'labels': [artist.name for artist in artists],
-            'data': [artist.num_artworks for artist in artists],  # Updated field name
+            'data': [artist.num_artworks for artist in artists],
         }
     except Exception as e:
-        print(f"Error in get_artists_by_artwork_data: {str(e)}")
-        return {
-            'labels': [],
-            'data': [],
-        }
+        print(f"Error in get_artists_by_artwork_data: {e}")
+        return {'labels': [], 'data': []}
+
+def get_artist_revenue_contribution_data(start_date=None, end_date=None):
+    """Returns total revenue generated by each artist's artworks."""
+    # Create a base filter for the date range if provided
+    date_filter = Q()
+    if start_date and end_date:
+        date_filter = Q(artworks__orderitem__order__created_at__date__range=[start_date, end_date])
+
+    artist_revenue = Artists.objects.annotate(
+        total_revenue_from_sales=Coalesce(
+            Sum(
+                F('artworks__orderitem__quantity') * F('artworks__orderitem__price_at_purchase'),
+                filter=Q(artworks__orderitem__order__payment__status='completed') & date_filter,
+                output_field=FloatField()
+            ),
+            0.0
+        )
+    ).filter(total_revenue_from_sales__gt=0).order_by('-total_revenue_from_sales')[:10]
+
+    return {
+        'labels': [artist.name for artist in artist_revenue],
+        'data': [float(artist.total_revenue_from_sales) for artist in artist_revenue],
+    }
 
 def get_bookings_trend_data(start_date=None, end_date=None):
-    from django.db.models.functions import TruncDay
-
+    """Returns daily booking counts within a date range."""
     bookings = Booking.objects.all()
     if start_date and end_date:
         bookings = bookings.filter(booking_date__date__range=[start_date, end_date])
@@ -562,34 +621,152 @@ def get_bookings_trend_data(start_date=None, end_date=None):
     }
 
 def get_exhibition_attendance_data():
+    """Returns attendance data for exhibitions (current attendees vs. max capacity)."""
     exhibitions = Exhibition.objects.annotate(
-        bookings_count=Count('bookings'),
         attendance_percentage=Case(
-            When(max_capacity=0, then=0),
+            When(max_capacity=0, then=0), # Avoid division by zero
             default=ExpressionWrapper(
                 F('current_attendees') * 100.0 / F('max_capacity'),
                 output_field=FloatField()
             ),
             output_field=FloatField()
         )
-    ).order_by('-attendance_percentage')
+    ).order_by('-attendance_percentage')[:10] # Top 10 by attendance percentage
 
     return {
         'labels': [exh.title for exh in exhibitions],
-        'data': [float(exh.attendance_percentage) for exh in exhibitions],
+        'data': [round(float(exh.attendance_percentage), 2) for exh in exhibitions],
         'max_capacity': [exh.max_capacity for exh in exhibitions],
         'current_attendees': [exh.current_attendees for exh in exhibitions],
-        'bookings_count': [exh.bookings_count for exh in exhibitions],
     }
 
+# NEW: Monthly Revenue Trend
+def get_monthly_revenue_trend(start_date=None, end_date=None):
+    """Returns total completed revenue aggregated by month."""
+    payments = Payment.objects.filter(status='completed')
+    if start_date and end_date:
+        payments = payments.filter(transaction_date__date__range=[start_date, end_date])
 
-# views.py
-from django.shortcuts import render, redirect
+    monthly_revenue = payments.annotate(month=TruncMonth('transaction_date')) \
+        .values('month') \
+        .annotate(total_amount=Sum('amount')) \
+        .order_by('month')
+
+    return {
+        'labels': [entry['month'].strftime('%Y-%m') for entry in monthly_revenue],
+        'data': [float(entry['total_amount']) for entry in monthly_revenue],
+    }
+
+# NEW: Top Selling Artworks
+def get_top_selling_artworks_data(start_date=None, end_date=None):
+    """Returns data for top 5 selling artworks by revenue and quantity."""
+    order_items = OrderItem.objects.select_related('artwork', 'order__payment').filter(order__payment__status='completed')
+    if start_date and end_date:
+        order_items = order_items.filter(order__created_at__date__range=[start_date, end_date])
+
+    top_artworks = order_items.values('artwork__title', 'artwork__id') \
+        .annotate(total_quantity_sold=Sum('quantity'), total_revenue=Sum(F('quantity') * F('price_at_purchase'))) \
+        .order_by('-total_revenue')[:5] # Top 5 selling artworks by revenue
+
+    return {
+        'labels': [item['artwork__title'] for item in top_artworks],
+        'quantity_data': [item['total_quantity_sold'] for item in top_artworks],
+        'revenue_data': [float(item['total_revenue']) for item in top_artworks],
+        'details': [ # Useful for rendering as a table
+            {'title': item['artwork__title'], 'quantity': item['total_quantity_sold'], 'revenue': round(float(item['total_revenue']), 2)}
+            for item in top_artworks
+        ]
+    }
+
+# NEW: Artwork Category Distribution
+def get_artwork_category_distribution():
+    """Returns the count of artworks per category."""
+    # This assumes Artworks has a 'category' field. Adjust 'category' to your field name (e.g., 'medium') if different.
+    artwork_categories = Artworks.objects.values('category').annotate(count=Count('id')).order_by('-count')
+
+    return {
+        'labels': [entry['category'] if entry['category'] else 'Uncategorized' for entry in artwork_categories],
+        'data': [entry['count'] for entry in artwork_categories],
+    }
+
+# NEW: Artist Revenue Contribution
+def get_artist_revenue_contribution_data(start_date=None, end_date=None):
+    """Returns total revenue generated by each artist's artworks."""
+    artist_revenue = Artists.objects.annotate(
+        total_revenue_from_sales=Sum(
+            Case(
+                When(artworks__orderitem__order__payment__status='completed', then=F('artworks__orderitem__quantity') * F('artworks__orderitem__price_at_purchase')),
+                default=0,
+                output_field=FloatField()
+            ),
+            # Filter for completed sales within the date range
+            filter=Q(
+                artworks__orderitem__order__payment__status='completed',
+                artworks__orderitem__order__created_at__date__range=[start_date, end_date] if start_date and end_date else Q()
+            )
+        )
+    ).order_by('-total_revenue_from_sales')[:10] # Top 10 artists by revenue
+
+    # Filter out artists with no sales or only 0 sales
+    filtered_artists = [
+        artist for artist in artist_revenue
+        if artist.total_revenue_from_sales is not None and artist.total_revenue_from_sales > 0
+    ]
+
+    return {
+        'labels': [artist.name for artist in filtered_artists],
+        'data': [round(float(artist.total_revenue_from_sales), 2) for artist in filtered_artists],
+    }
+
+# NEW: Most Frequent Customers (by Orders & Bookings)
+def get_most_frequent_customers_data(start_date=None, end_date=None):
+    """Returns a list of most frequent customers based on orders and bookings."""
+    customer_data = {}
+
+    # Aggregate orders by user
+    orders_by_user = Order.objects.filter(payment__status='completed')
+    if start_date and end_date:
+        orders_by_user = orders_by_user.filter(created_at__date__range=[start_date, end_date])
+
+    for order in orders_by_user.select_related('user'):
+        user_id = order.user.id if order.user else f"guest_{order.session_key or 'anon'}"
+        username = order.user.username if order.user else f"Guest ({order.session_key[:5] if order.session_key else 'N/A'})"
+        if user_id not in customer_data:
+            customer_data[user_id] = {'customer_name': username, 'orders': 0, 'bookings': 0, 'total_spend': 0.0}
+        customer_data[user_id]['orders'] += 1
+        customer_data[user_id]['total_spend'] += float(order.total_amount)
+
+    # Aggregate bookings by user (assuming Booking model has a 'user' ForeignKey)
+    bookings_by_user = Booking.objects.all()
+    if start_date and end_date:
+        bookings_by_user = bookings_by_user.filter(booking_date__date__range=[start_date, end_date])
+
+    for booking in bookings_by_user.select_related('user'):
+        if booking.user: # Only count if linked to a registered user
+            user_id = booking.user.id
+            username = booking.user.username
+            if user_id not in customer_data:
+                customer_data[user_id] = {'customer_name': username, 'orders': 0, 'bookings': 0, 'total_spend': 0.0}
+            customer_data[user_id]['bookings'] += 1
+
+    # Convert to a list of dictionaries and sort
+    sorted_customers = sorted(
+        [v for k, v in customer_data.items()],
+        key=lambda x: (x['orders'] + x['bookings'], x['total_spend']), # Sort by total activity, then spend
+        reverse=True
+    )[:10] # Top 10 most frequent customers
+
+    return sorted_customers
+
+
+# Assuming this is your app's main views.py file
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
-from .models import Cart, Footer, Order, Payment
-from .mpesa import initiate_stk_push
+# Ensure all necessary models are imported:
+from .models import Cart, Footer, Order, Payment, Artworks, CartItem, OrderItem # Added OrderItem
+
 import uuid
 import json
 from django.utils import timezone
@@ -597,12 +774,18 @@ from django.utils import timezone
 
 def checkout(request):
     try:
+        # Use .first() to handle cases where there might be multiple carts (though ideally there should be one)
         if request.user.is_authenticated:
-            cart = Cart.objects.get(user=request.user)
+            cart = Cart.objects.filter(user=request.user).first()
         else:
-            cart = Cart.objects.get(session_key=request.session.session_key)
+            cart = Cart.objects.filter(session_key=request.session.session_key).first()
+
+        if not cart or not cart.items.exists(): # Check if cart exists AND has items
+            messages.info(request, "Your cart is empty. Add some artworks before checking out!")
+            return redirect('artworks') # Redirect to artworks page if cart is empty
     except Cart.DoesNotExist:
-        return redirect('view_cart')
+        messages.error(request, "Your cart does not exist.")
+        return redirect('artworks') # Redirect to artworks page if cart not found
 
     return render(request, "checkout.html", {
         "cart": cart,
@@ -622,24 +805,52 @@ def process_payment(request):
         elif phone.startswith('+'):
             phone = phone[1:]
 
-        # Create simulated payment
+        # Get the cart for the current user/session
+        current_cart = None
+        if request.user.is_authenticated:
+            current_cart = Cart.objects.filter(user=request.user).first()
+        else:
+            current_cart = Cart.objects.filter(session_key=request.session.session_key).first()
+
+        if not current_cart or not current_cart.items.exists():
+            return JsonResponse({
+                'success': False,
+                'message': 'Your cart is empty. Cannot process payment.',
+                'reference': None
+            })
+
+        # --- SIMULATED PAYMENT SUCCESS ---
+        # In a real system, you'd initiate the STK push here and wait for confirmation.
+        # For this project, we directly mark as completed.
         payment = Payment.objects.create(
             phone_number=phone,
             amount=amount,
             receipt_number=f"SIM{timezone.now().strftime('%Y%m%d%H%M%S')}",
-            status='completed',
+            status='completed', # Directly mark as completed for simulation
             reference=reference
         )
 
-        # Create order
+        # Create the Order
         order = Order.objects.create(
             order_number=reference,
             user=request.user if request.user.is_authenticated else None,
             session_key=request.session.session_key if not request.user.is_authenticated else None,
-            total_amount=amount,
+            total_amount=current_cart.total_price, # Use cart's total price
             payment=payment
         )
 
+        # Transfer CartItems to OrderItems and clear the cart
+        for cart_item in current_cart.items.all():
+            OrderItem.objects.create(
+                order=order,
+                artwork=cart_item.artwork,
+                quantity=cart_item.quantity,
+                price_at_purchase=cart_item.artwork.price # Record the price at the time of purchase
+            )
+        current_cart.items.all().delete() # Delete all CartItems
+        current_cart.delete() # Delete the Cart itself
+
+        messages.success(request, "[SIMULATION] Payment successful and order placed! No real STK Push was sent.")
         return JsonResponse({
             'success': True,
             'message': '[SIMULATION] Payment successful! No real STK Push was sent.',
@@ -657,7 +868,6 @@ def payment_processing(request):
     })
 
 
-# views.py
 def payment_success(request):
     reference = request.GET.get('reference')
     try:
@@ -665,20 +875,15 @@ def payment_success(request):
 
         if request.method == 'POST':
             # Handle delivery information form submission
-            order.payment.delivery_address = request.POST.get('delivery_address')
-            order.payment.customer_email = request.POST.get('customer_email')
-            order.payment.save()
-            messages.success(request, "Delivery information saved successfully!")
-            # Redirect back to the same page with the reference
-            return redirect(f'/payment-success/?reference={reference}')
+            if order.payment: # Ensure payment object exists
+                order.payment.delivery_address = request.POST.get('delivery_address')
+                order.payment.customer_email = request.POST.get('customer_email')
+                order.payment.save()
+                messages.success(request, "Delivery information saved successfully!")
+                return redirect(f'/payment-success/?reference={reference}')
+            else:
+                messages.error(request, "Payment details not found for this order.")
 
-        # Clear cart after successful payment
-        if request.user.is_authenticated:
-            Cart.objects.filter(user=request.user).delete()
-        else:
-            Cart.objects.filter(session_key=request.session.session_key).delete()
-            if 'cart_id' in request.session:
-                del request.session['cart_id']
 
         return render(request, "payment_success.html", {
             'order': order,
@@ -686,9 +891,11 @@ def payment_success(request):
             'footer': Footer.objects.all()
         })
     except Order.DoesNotExist:
-        messages.error(request, "Order not found")
+        messages.error(request, "Order not found.")
         return redirect('home')
 
+# Keep your existing artworks, add_to_cart, view_cart, remove_from_cart, update_cart_item functions as is.
+# Ensure they correctly import Artworks, Cart, CartItem, Footer.
 
 # These can be kept but won't be used in simulation
 @csrf_exempt
