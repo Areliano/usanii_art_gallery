@@ -105,5 +105,32 @@
 
 ## THE BACKEND WAS DEVELOPED USING PYTHON-DJANGO AND THIS IS HOW IT WORKS
 
+## Under Authentication and Authorization, click on Users
+![img_40.png](img_40.png)
+
+## This is where the admin can edit customer priviledges.
+![img_41.png](img_41.png)
+
+## Click on any user to give them permission to the website
+![img_42.png](img_42.png)
+
+## Click on Artists to Add, Delete, or Edit an Artist
+![img_43.png](img_43.png)
+
+## This is what you get when you click Add Artists
+![img_44.png](img_44.png)
+
+## On Artworks is where to add, edit or delete artworks
+![img_45.png](img_45.png)
+
+## On Exhibitions is where to add, edit or delete Exhibitions
+![img_46.png](img_46.png)
+
+## On orders is where to add, edit, delete orders
+![img_47.png](img_47.png)
+
+## Payments displays the payments made through the system and all details related 
+![img_48.png](img_48.png)
 
 
+## NB: NOTE THAT THE WEBSITE IS FULLY DYNAMIC, MEANING, YOU CAN CHANGE ALMOST EVERYTHING ON THE FRONTEND SIDE THROUGH THE BACKEND WITHOUT HAVING TO GO BACK TO THE CODE. eVEN THE DETAILS OF THE HOMEPAGE, FOOTER ETC CAN BE CHANGED FROM THE BACKEND SIDE(ADMIN SIDE)
